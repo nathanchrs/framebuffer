@@ -35,14 +35,10 @@ void fb_init(FrameBuffer *fb, char *fbPath) {
 
 	long screenMemorySize = fb->vinfo.yres_virtual * fb->finfo.line_length;
 	fb->address = mmap(0, screenMemorySize, PROT_READ | PROT_WRITE, MAP_SHARED, fb->fileDescriptor, (off_t) 0);
-
-	fb->bufferIndex = 0;
 }
 
-void fb_switchBuffer(FrameBuffer *fb) {
-	fb->bufferIndex = (fb->bufferIndex+1) % 2;
-	fb->vinfo.yoffset = fb->vinfo.yres * fb->bufferIndex;
-	ioctl(fb->fileDescriptor, FBIOPAN_DISPLAY, &fb->vinfo);
+void fb_output(FrameBuffer *fb) {
+	memcpy((uint32_t*) fb->address, &fb->backBuffer, fb->vinfo.xres * fb->vinfo.yres * (fb->vinfo.bits_per_pixel / 8));
 }
 
 void fb_printInfo(FrameBuffer *fb) {
@@ -80,12 +76,10 @@ uint32_t getColorValue(FrameBuffer *fb, Color color) {
 }
 
 void fb_drawPixel(FrameBuffer *fb, Point point, Color color) {
-	long bufferOffset = fb->vinfo.yres * ((fb->bufferIndex+1) % 2);
 	if (point.x >= 0 && point.x < fb->vinfo.xres && point.y >= 0 && point.y < fb->vinfo.yres) {
-		long addressOffset = (point.x + fb->vinfo.xoffset) * (fb->vinfo.bits_per_pixel / 8)
-			+ (point.y + bufferOffset) * fb->finfo.line_length;
+		long addressOffset = point.x + (point.y * fb->finfo.line_length / (fb->vinfo.bits_per_pixel / 8));
 		uint32_t colorValue = getColorValue(fb, color);
-		*((uint32_t*)(fb->address + addressOffset)) = colorValue;
+		fb->backBuffer[addressOffset] = colorValue;
 	}
 }
 
