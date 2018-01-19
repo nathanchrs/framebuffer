@@ -22,9 +22,9 @@ typedef struct {
 } FrameBuffer;
 
 typedef struct {
-	char r;
-	char g;
-	char b;
+	unsigned char r;
+	unsigned char g;
+	unsigned char b;
 } Color;
 
 typedef struct {
@@ -32,7 +32,7 @@ typedef struct {
 	long y;
 } Point;
 
-Color c_make(char r, char g, char b);
+Color c_make(unsigned char r, unsigned char g, unsigned char b);
 
 Point p_make(long x, long y);
 
@@ -46,5 +46,7 @@ long fb_getHeight(FrameBuffer *fb);
 void fb_clear(FrameBuffer *fb, Color color);
 void fb_drawPixel(FrameBuffer *fb, Point point, Color color);
 void fb_drawRectangle(FrameBuffer *fb, Point p1, Point p2, Color color);
+void fb_drawCircle(FrameBuffer *fb, Point center, double r, Color color);
+void fb_drawCircleOutline(FrameBuffer *fb, Point center, double r, double thickness, Color color);
 
 #endif

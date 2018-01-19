@@ -1,7 +1,7 @@
 #include "framebuffer.h"
 #include <stdio.h>
 
-Color c_make(char r, char g, char b) {
+Color c_make(unsigned char r, unsigned char g, unsigned char b) {
 	Color c;
 	c.r = r;
 	c.g = g;
@@ -90,4 +90,31 @@ void fb_drawRectangle(FrameBuffer *fb, Point p1, Point p2, Color color) {
 			fb_drawPixel(fb, p_make(x, y), color);
 		}
 	}
+}
+
+void fb_drawCircle(FrameBuffer *fb, Point center, double r, Color color) {
+	int x, y;
+	for (x = center.x - (int) r; x <= center.x + (int) r; x++) {
+		for (y = center.y - (int) r; y <= center.y + (int) r; y++) {
+			int dx = center.x - x;
+			int dy = center.y - y;
+			if (dx*dx + dy*dy <= (int) (r*r)) {
+				fb_drawPixel(fb, p_make(x, y), color);
+			}
+		}
+	}	
+}
+
+void fb_drawCircleOutline(FrameBuffer *fb, Point center, double r, double thickness, Color color) {
+	int x, y;
+	for (x = center.x - (int) r; x <= center.x + (int) r; x++) {
+		for (y = center.y - (int) r; y <= center.y + (int) r; y++) {
+			int dx = center.x - x;
+			int dy = center.y - y;
+			int innerRadius = r - thickness;
+			if ((dx*dx + dy*dy <= (int) (r*r)) && (dx*dx + dy*dy > (int) (innerRadius*innerRadius))) {
+				fb_drawPixel(fb, p_make(x, y), color);
+			}
+		}
+	}	
 }
