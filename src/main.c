@@ -38,7 +38,9 @@ void render(long elapsedMillis) {
 	int i, j;
 	for (i = 0; i < width; i += 60) {
 		for (j = 0; j < height; j += 60) {
-			drawPulse(elapsedMillis - sqrt((i-width/2)*(i-width/2) + (j-height/2)*(j-height/2)), p_make(i, j), 20, c_make(0x05, 0xcb, 0xff));	
+			drawPulse(elapsedMillis - sqrt((i-width/2)*(i-width/2) + (j-height/2)*(j-height/2)) - 40, p_make(i, j), 20, c_make(0x01, 0x22, 0x55));
+			drawPulse(elapsedMillis - sqrt((i-width/2)*(i-width/2) + (j-height/2)*(j-height/2)) + 40, p_make(i, j), 20, c_make(0x01, 0x22, 0x55));
+			drawPulse(elapsedMillis - sqrt((i-width/2)*(i-width/2) + (j-height/2)*(j-height/2)), p_make(i, j), 20, c_make(0x05, 0xcb, 0xff));
 		}
 	}
 
