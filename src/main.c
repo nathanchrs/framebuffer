@@ -299,6 +299,18 @@ void drawData(int x, int y) {
   }
 }
 
+void drawPlane(int x, int y) {
+  drawSquareLine(x, y, x+150, y, 10, 2);
+}
+
+void drawBullet(int elapsedMillis, int x0, int y0, int x1, int y1, int t0, int t1) {
+  int dx = x1 - x0;
+  int dy = y1 - y0;
+  int x = (elapsedMillis - t0) * dx / (t1 - t0) + x0;
+  int y = (elapsedMillis - t0) * dy / (t1 - t0) + y0;
+  drawSquareLine(x, y, x+(40*dx/dy), y+40, 1, 1);
+}
+
 void render(long elapsedMillis) {
 	// Clear screen from previous frame
 	fb_clear(&fb, COLOR_BLACK);
@@ -320,6 +332,24 @@ void render(long elapsedMillis) {
 
 	// Progress rectangle
 	fb_drawRectangle(&fb, p_make(0, 0), p_make(elapsedMillis * width / TOTAL_DURATION, 10), c_make(0xff, 0xff, 0xff));
+	
+	//Pesawat 1
+	if (elapsedMillis > 535 && elapsedMillis < 1805) {
+	  drawPlane(width - (elapsedMillis - 535) * (width * 3 / 4) / 1270, 40);
+	}
+	
+	if (elapsedMillis > 1215 && elapsedMillis < 1805) {
+	  drawBullet(elapsedMillis, width/2, height, width/4 + 70, 40, 1215, 1805);
+	}
+	
+	//Pesawat 2
+	if (elapsedMillis > 700 && elapsedMillis < 2300) {
+	  drawPlane((elapsedMillis - 900) * (width * 2 / 3) / 1400, 70);
+	}
+	
+	if (elapsedMillis > 1600 && elapsedMillis < 2300) {
+	  drawBullet(elapsedMillis, width/2, height, width*2/3 + 70, 70, 1600, 2300);
+	}
 	
 	int x = (width - (dataWidth*30 - 5))/2;
 	int y = height - (elapsedMillis * (height + (dataHeight*40 - 15)) / TOTAL_DURATION);
