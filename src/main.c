@@ -21,6 +21,42 @@ char data[7][31] = {"         KELOMPOK EVOS         ",
                     "   AFIF BAMBANG P - 13515058   ",
                     "  LAZUARDI FIRDAUS - 13515136  "};
 
+int planeIsHit = 0;
+
+
+void drawPlane(Point position){
+	//printf("ping\n");
+	drawSquareLine(position.x,position.y+7,position.x+32,position.y+7,4,c_make(0xff,0xff,0xff));
+	drawSquareLine(position.x+8, position.y+7, position.x+24, position.y-9, 4, c_make(0xff,0xff,0xff));
+	drawSquareLine(position.x+8, position.y+7, position.x+24, position.y+23, 4, c_make(0xff,0xff,0xff));
+	drawSquareLine(position.x+32, position.y+7, position.x+36, position.y+3, 4, c_make(0xff,0xff,0xff));
+}
+
+void drawBullet(Point position, int elapsedMillis){
+	int bulletLength=10;
+	int jumpDistance=10;
+	int msPerJump=50;
+	int width=position.x-0.5*fb_getWidth(&fb);
+	int height=fb_getHeight(&fb)-position.y;
+
+	int distanceTraveled=elapsedMillis*jumpDistance/msPerJump;
+	int startX=(distanceTraveled*width/(sqrt((width*width)+(height*height))))+(0.5*fb_getWidth(&fb));
+	int startY=fb_getHeight(&fb)-(distanceTraveled*height/(sqrt((width*width)+(height*height))));
+	int endX=startX+(bulletLength*width/(sqrt((width*width)+(height*height))));
+	int endY=startY-(bulletLength*height/(sqrt((width*width)+(height*height))));
+	drawSquareLine(startX,startY,endX,endY,1,c_make(0xff,0x00,0x00));
+	
+	if(endY < position.y){
+		planeIsHit=1;
+	}
+}
+
+void drawExplosion(long elapsedMilis, Point center, double radius){
+	long duration = 350;
+	long time = elapsedMilis % duration;
+	double animRadius = easeOutQuadratic(time, 0, radius, duration);
+	fb_drawCircleOutline(&fb, center, animRadius, 1.0, c_make(0xff,0x50,0x00));
+}
 
 void drawPulse(long elapsedMillis, Point center, double radius, Color color) {
 	long duration = 700;
@@ -84,6 +120,7 @@ void drawSquareLine(int x0, int y0, int x1, int y1, int size, int color) {
   int err = dx + dy, e2; /* error value e_xy */
  
   for (;;){  /* loop */
+	//printf("ping2\n");
     drawSquarePixel(x0, y0, size, color);
     if (x0 == x1 && y0 == y1) break;
     e2 = 2 * err;
@@ -325,6 +362,21 @@ void render(long elapsedMillis) {
 	int y = height - (elapsedMillis * (height + (dataHeight*40 - 15)) / TOTAL_DURATION);
 	drawData(x, y);
  
+	//Flying Plane
+	if(planeIsHit == 0){
+		drawPlane(p_make(width-(elapsedMillis*width/TOTAL_DURATION),20));
+	}
+
+	//Bullet
+	if(planeIsHit == 0){
+		drawBullet(p_make(875,27),elapsedMillis);
+	}
+
+	//explosion
+	if(planeIsHit == 1){
+		drawExplosion(elapsedMillis, p_make(875,27),20);
+	}
+
 	// Output drawn pixels to screen
 	fb_output(&fb);
 }
