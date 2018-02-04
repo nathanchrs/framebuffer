@@ -54,12 +54,23 @@ int main() {
 		fb.clear(Color(0, 0, 0));
 
 		// Draw all objects
-		for (int i = 0; i < objects.size(); i++) {
+		for (size_t i = 0; i < objects.size(); i++) {
 			objects[i]->render(fb, elapsedMillis);
 		}
 
 		// Draw progress bar
 		fb.drawRectangle(Point(0, 0), Point(elapsedMillis * fb.getWidth() / TOTAL_DURATION, 10), Color(0xff, 0xff, 0xff));
+
+		// Test draws
+		fb.drawLine(Point(0, 0), Point(100, 200), Color(0, 0xff, 0));
+		fb.drawLine(Point(100, 200), Point(200, 200), Color(0, 0, 0xff));
+		fb.drawLine(Point(100, 300), Point(200, 200), Color(0xff, 0, 0));
+
+		std::vector<Point> testp;
+		testp.push_back(Point(0, 0));
+		testp.push_back(Point(0, 200));
+		testp.push_back(Point(200, 200));
+		fb.drawPolygon(Point(50, 50), testp, Color(0xff, 0, 0), Color(0xff, 0xff, 0xff));
 
 		// Render drawn graphics on screen
 		fb.output();
@@ -73,7 +84,7 @@ int main() {
 
 	/* CLEAN UP */
 
-	for (int i = 0; i < objects.size(); i++) {
+	for (size_t i = 0; i < objects.size(); i++) {
 		delete objects[i];
 	}
 

@@ -7,6 +7,7 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 #include <cstring>
+#include <vector>
 #include "Color.h"
 #include "Point.h"
 
@@ -29,7 +30,10 @@ public:
 	void drawCircle(Point center, double r, Color color);
 	void drawCircleOutline(Point center, double r, double thickness, Color color);
 
-private:
+	void drawLine(Point p1, Point p2, Color color);
+	void drawPolygon(Point topLeftPosition, std::vector<Point> points, Color fillColor, Color strokeColor);
+
+  private:
 	int fileDescriptor;
 	uint8_t *address;
 	uint8_t *backBuffer;

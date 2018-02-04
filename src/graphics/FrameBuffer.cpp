@@ -101,3 +101,149 @@ void FrameBuffer::drawCircleOutline(Point center, double r, double thickness, Co
 		}
 	}	
 }
+
+void FrameBuffer::drawLine(Point p1, Point p2, Color color) {
+	long x0 = p1.x;
+	long y0 = p1.y;
+	long x1 = p2.x;
+	long y1 = p2.y;
+	long dx = (x1 - x0 > 0 ? x1 - x0 : x0 - x1), sx = x0 < x1 ? 1 : -1;
+	long dy = -(y1 - y0 > 0 ? y1 - y0 : y0 - y1), sy = y0 < y1 ? 1 : -1;
+	long err = dx + dy, e2; /* error value e_xy */
+
+	while (true) {
+		setPixel(Point(x0, y0), color);
+		if (x0 == x1 && y0 == y1) break;
+		e2 = 2 * err;
+		if (e2 >= dy) {
+			err += dy;
+			x0 += sx;
+		} /* e_xy+e_x > 0 */
+		if (e2 <= dx) {
+			err += dx;
+			y0 += sy;
+		} /* e_xy+e_y < 0 */
+	}
+}
+
+/* Helper function for drawing values a working area buffer buf */
+void drawLineBuf(uint8_t *buf, long bufWidth, Point p1, Point p2, uint8_t value) {
+	long x0 = p1.x;
+	long y0 = p1.y;
+	long x1 = p2.x;
+	long y1 = p2.y;
+	long dx = (x1 - x0 > 0 ? x1 - x0 : x0 - x1), sx = x0 < x1 ? 1 : -1;
+	long dy = -(y1 - y0 > 0 ? y1 - y0 : y0 - y1), sy = y0 < y1 ? 1 : -1;
+	long err = dx + dy, e2; /* error value e_xy */
+
+	while (true) {
+		buf[y0*bufWidth + x0] = value;
+		if (x0 == x1 && y0 == y1) break;
+		e2 = 2 * err;
+		if (e2 >= dy) {
+			err += dy;
+			x0 += sx;
+		} /* e_xy+e_x > 0 */
+		if (e2 <= dx) {
+			err += dx;
+			y0 += sy;
+		} /* e_xy+e_y < 0 */
+	}
+}
+
+void FrameBuffer::drawPolygon(Point topLeftPosition, std::vector<Point> points, Color fillColor, Color strokeColor) {
+	if (points.size() < 3) return;
+
+	// Determine bounding box widths (assumes polygon points are relative to (0, 0))
+	long boundingBoxWidth = points[0].x;
+	long boundingBoxHeight = points[0].y;
+	for (size_t i = 1; i < points.size(); i++) {
+		if (points[i].x > boundingBoxWidth) boundingBoxWidth = points[i].x;
+		if (points[i].y > boundingBoxHeight) boundingBoxHeight = points[i].y;
+	}
+	boundingBoxWidth++;
+	boundingBoxHeight++;	
+	long boundingBoxSize = boundingBoxWidth * boundingBoxHeight;
+
+	// Assign temporary drawing area (buf) and initialize
+	uint8_t *buf = new uint8_t[boundingBoxSize];
+	for (long i = 0; i < boundingBoxSize; i++) {
+		buf[i] = 0;
+	}
+	
+	// buf format: for each pixel,
+	// - 3 least significant bits are used to count number of fills
+	// - The next 1 bit (0x08) are used to store whether this pixel contains a stroke
+	const uint8_t STROKE_PIXEL_FLAG = 0x08;
+
+	// Draw polygon strokes on buf
+	for (size_t i = 1; i < points.size(); i++) {
+		drawLineBuf(buf, boundingBoxWidth, points[i-1], points[i], STROKE_PIXEL_FLAG);
+	}
+	drawLineBuf(buf, boundingBoxWidth, points[points.size() - 1], points[0], STROKE_PIXEL_FLAG);
+
+	// Left->right raster fill
+	for (long r = 0; r < boundingBoxHeight; r++) {
+		long c = 0;
+		bool doFill = false;
+		while (c < boundingBoxWidth) {
+			if (buf[r * boundingBoxWidth + c] & STROKE_PIXEL_FLAG) {
+				while (c < boundingBoxWidth && (buf[r * boundingBoxWidth + c] & STROKE_PIXEL_FLAG)) {
+					c++;
+				}
+				doFill = !doFill;
+			}
+			if (c >= boundingBoxWidth) break;
+			if (doFill) buf[r * boundingBoxWidth + c]++;
+			c++;
+		}
+	}
+
+	// Right->left raster fill
+	for (long r = 0; r < boundingBoxHeight; r++) {
+		long c = boundingBoxWidth - 1;
+		bool doFill = false;
+		while (c >= 0) {
+			if (buf[r * boundingBoxWidth + c] & STROKE_PIXEL_FLAG) {
+				while (c >= 0 && (buf[r * boundingBoxWidth + c] & STROKE_PIXEL_FLAG)) {
+					c--;
+				}
+				doFill = !doFill;
+			}
+			if (c < 0) break;
+			if (doFill) buf[r * boundingBoxWidth + c]++;
+			c--;
+		}
+	}
+
+	// Bottom->top raster fill
+	for (long c = 0; c < boundingBoxWidth; c++) {
+		long r = boundingBoxHeight - 1;
+		bool doFill = false;
+		while (r >= 0) {
+			if (buf[r * boundingBoxWidth + c] & STROKE_PIXEL_FLAG) {
+				while (r >= 0 && (buf[r * boundingBoxWidth + c] & STROKE_PIXEL_FLAG)) {
+					r--;
+				}
+				doFill = !doFill;
+			}
+			if (r < 0) break;
+			if (doFill) buf[r * boundingBoxWidth + c]++;
+			r--;
+		}
+	}
+
+	// Draw stroke pixels and pixels with fill count == 3 in buf to framebuffer
+	for (long r = 0; r < boundingBoxHeight; r++) {
+		for (long c = 0; c < boundingBoxWidth; c++) {
+			if (buf[r * boundingBoxWidth + c] & STROKE_PIXEL_FLAG) {
+				setPixel(Point(c + topLeftPosition.x, r + topLeftPosition.y), strokeColor);
+			} else if ((buf[r * boundingBoxWidth + c] & (STROKE_PIXEL_FLAG - 1)) >= 3) {
+				setPixel(Point(c + topLeftPosition.x, r + topLeftPosition.y), fillColor);
+			}
+		}
+	}
+
+	// Free temporary drawing area
+	delete[] buf;
+}
