@@ -10,6 +10,7 @@
 #include <vector>
 #include "Color.h"
 #include "Point.h"
+#include "PathSegment.h"
 
 class FrameBuffer {
 public:
@@ -31,7 +32,7 @@ public:
 	void drawCircleOutline(Point center, double r, double thickness, Color color);
 
 	void drawLine(Point p1, Point p2, Color color);
-	void drawPolygon(Point topLeftPosition, std::vector<Point> points, Color fillColor, Color strokeColor);
+	void drawPath(Point topLeftPosition, std::vector<PathSegment> segments, Color fillColor, Color strokeColor);
 
   private:
 	int fileDescriptor;

@@ -66,11 +66,15 @@ int main() {
 		fb.drawLine(Point(100, 200), Point(200, 200), Color(0, 0, 0xff));
 		fb.drawLine(Point(100, 300), Point(200, 200), Color(0xff, 0, 0));
 
-		std::vector<Point> testp;
-		testp.push_back(Point(0, 0));
-		testp.push_back(Point(0, 200));
-		testp.push_back(Point(200, 200));
-		fb.drawPolygon(Point(50, 50), testp, Color(0xff, 0, 0), Color(0xff, 0xff, 0xff));
+		std::vector<PathSegment> testp;
+		testp.push_back(PathSegment(Point(0, 0), Point(200, 0)));
+		testp.push_back(PathSegment(Point(200, 0), Point(200, 200)));
+		testp.push_back(PathSegment(Point(200, 200), Point(0, 200)));
+		testp.push_back(PathSegment(Point(0, 200), Point(0, 0)));
+		testp.push_back(PathSegment(Point(100, 50), Point(100, 150)));
+		testp.push_back(PathSegment(Point(100, 150), Point(50, 150)));
+		testp.push_back(PathSegment(Point(50, 150), Point(100, 50)));
+		fb.drawPath(Point(50, 50), testp, Color(0xff, 0, 0), Color(0xff, 0xff, 0xff));
 
 		// Render drawn graphics on screen
 		fb.output();

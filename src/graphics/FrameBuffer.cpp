@@ -151,15 +151,17 @@ void drawLineBuf(uint8_t *buf, long bufWidth, Point p1, Point p2, uint8_t value)
 	}
 }
 
-void FrameBuffer::drawPolygon(Point topLeftPosition, std::vector<Point> points, Color fillColor, Color strokeColor) {
-	if (points.size() < 3) return;
+void FrameBuffer::drawPath(Point topLeftPosition, std::vector<PathSegment> segments, Color fillColor, Color strokeColor) {
+	if (segments.size() <= 0) return;
 
 	// Determine bounding box widths (assumes polygon points are relative to (0, 0))
-	long boundingBoxWidth = points[0].x;
-	long boundingBoxHeight = points[0].y;
-	for (size_t i = 1; i < points.size(); i++) {
-		if (points[i].x > boundingBoxWidth) boundingBoxWidth = points[i].x;
-		if (points[i].y > boundingBoxHeight) boundingBoxHeight = points[i].y;
+	long boundingBoxWidth = segments[0].start.x;
+	long boundingBoxHeight = segments[0].start.y;
+	for (size_t i = 0; i < segments.size(); i++) {
+		if (segments[i].start.x > boundingBoxWidth) boundingBoxWidth = segments[i].start.x;
+		if (segments[i].start.y > boundingBoxHeight) boundingBoxHeight = segments[i].start.y;
+		if (segments[i].end.x > boundingBoxWidth) boundingBoxWidth = segments[i].end.x;
+		if (segments[i].end.y > boundingBoxHeight) boundingBoxHeight = segments[i].end.y;
 	}
 	boundingBoxWidth++;
 	boundingBoxHeight++;	
@@ -177,10 +179,9 @@ void FrameBuffer::drawPolygon(Point topLeftPosition, std::vector<Point> points, 
 	const uint8_t STROKE_PIXEL_FLAG = 0x08;
 
 	// Draw polygon strokes on buf
-	for (size_t i = 1; i < points.size(); i++) {
-		drawLineBuf(buf, boundingBoxWidth, points[i-1], points[i], STROKE_PIXEL_FLAG);
+	for (size_t i = 0; i < segments.size(); i++) {
+		drawLineBuf(buf, boundingBoxWidth, segments[i].start, segments[i].end, STROKE_PIXEL_FLAG);
 	}
-	drawLineBuf(buf, boundingBoxWidth, points[points.size() - 1], points[0], STROKE_PIXEL_FLAG);
 
 	// Left->right raster fill
 	for (long r = 0; r < boundingBoxHeight; r++) {
