@@ -172,15 +172,20 @@ void FrameBuffer::drawPath(Point topLeftPosition, std::vector<PathSegment> segme
 	for (long i = 0; i < boundingBoxSize; i++) {
 		buf[i] = 0;
 	}
-	
+
 	// buf format: for each pixel,
-	// - 3 least significant bits are used to count number of fills
-	// - The next 1 bit (0x08) are used to store whether this pixel contains a stroke
-	const uint8_t STROKE_PIXEL_FLAG = 0x08;
+	// - Least significant bit (0x01) used to store whether this pixel contains a stroke
+	// - Next 2 bits are used to count number of horizontal fills
+	// - Next 2 bits are used to count number of vertical fills
+	const uint8_t STROKE_MASK = 0b00000001;
+	const uint8_t HORIZONTAL_FILL_COUNT_OFFSET = 1;
+	const uint8_t HORIZONTAL_FILL_COUNT_MASK = 0b00000110;
+	const uint8_t VERTICAL_FILL_COUNT_OFFSET = 3;
+	const uint8_t VERTICAL_FILL_COUNT_MASK = 0b00011000;
 
 	// Draw polygon strokes on buf
 	for (size_t i = 0; i < segments.size(); i++) {
-		drawLineBuf(buf, boundingBoxWidth, segments[i].start, segments[i].end, STROKE_PIXEL_FLAG);
+		drawLineBuf(buf, boundingBoxWidth, segments[i].start, segments[i].end, STROKE_MASK);
 	}
 
 	// Left->right raster fill
@@ -188,14 +193,14 @@ void FrameBuffer::drawPath(Point topLeftPosition, std::vector<PathSegment> segme
 		long c = 0;
 		bool doFill = false;
 		while (c < boundingBoxWidth) {
-			if (buf[r * boundingBoxWidth + c] & STROKE_PIXEL_FLAG) {
-				while (c < boundingBoxWidth && (buf[r * boundingBoxWidth + c] & STROKE_PIXEL_FLAG)) {
+			if (buf[r * boundingBoxWidth + c] & STROKE_MASK) {
+				while (c < boundingBoxWidth && (buf[r * boundingBoxWidth + c] & STROKE_MASK)) {
 					c++;
 				}
 				doFill = !doFill;
 			}
 			if (c >= boundingBoxWidth) break;
-			if (doFill) buf[r * boundingBoxWidth + c]++;
+			if (doFill) buf[r * boundingBoxWidth + c] += (1 << HORIZONTAL_FILL_COUNT_OFFSET);
 			c++;
 		}
 	}
@@ -205,15 +210,32 @@ void FrameBuffer::drawPath(Point topLeftPosition, std::vector<PathSegment> segme
 		long c = boundingBoxWidth - 1;
 		bool doFill = false;
 		while (c >= 0) {
-			if (buf[r * boundingBoxWidth + c] & STROKE_PIXEL_FLAG) {
-				while (c >= 0 && (buf[r * boundingBoxWidth + c] & STROKE_PIXEL_FLAG)) {
+			if (buf[r * boundingBoxWidth + c] & STROKE_MASK) {
+				while (c >= 0 && (buf[r * boundingBoxWidth + c] & STROKE_MASK)) {
 					c--;
 				}
 				doFill = !doFill;
 			}
 			if (c < 0) break;
-			if (doFill) buf[r * boundingBoxWidth + c]++;
+			if (doFill) buf[r * boundingBoxWidth + c] += (1 << HORIZONTAL_FILL_COUNT_OFFSET);
 			c--;
+		}
+	}
+
+	// Top->bottom raster fill
+	for (long c = 0; c < boundingBoxWidth; c++) {
+		long r = 0;
+		bool doFill = false;
+		while (r < boundingBoxHeight) {
+			if (buf[r * boundingBoxWidth + c] & STROKE_MASK) {
+				while (r < boundingBoxHeight && (buf[r * boundingBoxWidth + c] & STROKE_MASK)) {
+					r++;
+				}
+				doFill = !doFill;
+			}
+			if (r >= boundingBoxHeight) break;
+			if (doFill) buf[r * boundingBoxWidth + c] += (1 << VERTICAL_FILL_COUNT_OFFSET);
+			r++;
 		}
 	}
 
@@ -222,14 +244,14 @@ void FrameBuffer::drawPath(Point topLeftPosition, std::vector<PathSegment> segme
 		long r = boundingBoxHeight - 1;
 		bool doFill = false;
 		while (r >= 0) {
-			if (buf[r * boundingBoxWidth + c] & STROKE_PIXEL_FLAG) {
-				while (r >= 0 && (buf[r * boundingBoxWidth + c] & STROKE_PIXEL_FLAG)) {
+			if (buf[r * boundingBoxWidth + c] & STROKE_MASK) {
+				while (r >= 0 && (buf[r * boundingBoxWidth + c] & STROKE_MASK)) {
 					r--;
 				}
 				doFill = !doFill;
 			}
 			if (r < 0) break;
-			if (doFill) buf[r * boundingBoxWidth + c]++;
+			if (doFill) buf[r * boundingBoxWidth + c] += (1 << VERTICAL_FILL_COUNT_OFFSET);
 			r--;
 		}
 	}
@@ -237,10 +259,16 @@ void FrameBuffer::drawPath(Point topLeftPosition, std::vector<PathSegment> segme
 	// Draw stroke pixels and pixels with fill count == 3 in buf to framebuffer
 	for (long r = 0; r < boundingBoxHeight; r++) {
 		for (long c = 0; c < boundingBoxWidth; c++) {
-			if (buf[r * boundingBoxWidth + c] & STROKE_PIXEL_FLAG) {
+			if (buf[r * boundingBoxWidth + c] & STROKE_MASK) {
 				setPixel(Point(c + topLeftPosition.x, r + topLeftPosition.y), strokeColor);
-			} else if ((buf[r * boundingBoxWidth + c] & (STROKE_PIXEL_FLAG - 1)) >= 3) {
-				setPixel(Point(c + topLeftPosition.x, r + topLeftPosition.y), fillColor);
+			} else {
+				uint8_t verticalFillCount = (buf[r * boundingBoxWidth + c] & VERTICAL_FILL_COUNT_MASK) >> VERTICAL_FILL_COUNT_OFFSET;
+				uint8_t horizontalFillCount = (buf[r * boundingBoxWidth + c] & HORIZONTAL_FILL_COUNT_MASK) >> HORIZONTAL_FILL_COUNT_OFFSET;
+				if ((verticalFillCount >= 2 && horizontalFillCount >= 1) || (verticalFillCount >= 1 && horizontalFillCount >= 2)) {
+					setPixel(Point(c + topLeftPosition.x, r + topLeftPosition.y), fillColor);
+				} else if (verticalFillCount == 1 && horizontalFillCount == 1) {
+					// TODO: handle special case, perhaps see neighboring pixels
+				}
 			}
 		}
 	}

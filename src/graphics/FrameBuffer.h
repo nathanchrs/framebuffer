@@ -10,7 +10,7 @@
 #include <vector>
 #include "Color.h"
 #include "Point.h"
-#include "PathSegment.h"
+#include "./PathSegment.h"
 
 class FrameBuffer {
 public:
