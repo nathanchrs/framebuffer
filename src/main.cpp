@@ -83,7 +83,18 @@ int main() {
 		fb.drawLine(Point(100, 200), Point(200, 200), Color(0, 0, 0xff));
 		fb.drawLine(Point(100, 300), Point(200, 200), Color(0xff, 0, 0));
 
-		fb.drawText(Point(100, 100), "ABCDEFGHIJ KLMNOPQRSTUVWXYZ 1234567890", font, Color(0xff, 0, 0), Color(0xff, 0xff, 0xff));
+    int dataWidth = 31;
+    int dataHeight = 7;
+	  long width = fb.getWidth();
+	  long height = fb.getHeight();
+    int x_text = (width - (dataWidth*20))/2;
+	  int y_text = height - (elapsedMillis * (height + (dataHeight*40 - 15)) / TOTAL_DURATION);
+		fb.drawText(Point(x_text, y_text), "         KELOMPOK EVOS         ", font, Color(0xff, 0, 0), Color(0xff, 0xff, 0xff));
+		fb.drawText(Point(x_text, y_text+60), "JONATHAN CHRISTOPHER   13515001", font, Color(0xff, 0x66, 0), Color(0xff, 0xff, 0xff));
+		fb.drawText(Point(x_text, y_text+90), "ROBBY SYAIFULLAH   13515013", font, Color(0xff, 0xff, 0), Color(0xff, 0xff, 0xff));
+		fb.drawText(Point(x_text, y_text+120), "KEVIN JONATHAN   13515052", font, Color(0, 0xff, 0), Color(0xff, 0xff, 0xff));
+		fb.drawText(Point(x_text, y_text+150), "AFIF BAMBANG P   13515058", font, Color(0, 0, 0xff), Color(0xff, 0xff, 0xff));
+		fb.drawText(Point(x_text, y_text+180), "LAZUARDI FIRDAUS   13515136", font, Color(0xff, 0, 0xff), Color(0xff, 0xff, 0xff));
 
 
 		// Render drawn graphics on screen
