@@ -6,7 +6,7 @@ void Explosion::update(long elapsedMillis) {
 	long age = getAge(elapsedMillis);
 	long animAge = age > duration ? duration : age;
 	animRadius = easeOutQuadratic(0, radius, animAge, duration);
-	if (age >= 1500) die();
+	if (age >= 1200) die();
 }
 
 void Explosion::render(FrameBuffer &fb) {

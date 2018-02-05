@@ -23,9 +23,7 @@ int main() {
 
 	Font font = Font("font.txt", 1.0);
 
-	objects.push_back(new Explosion(0, Point(200, 200)));
-
-	long enemySpawnInterval = 1000;
+	long enemySpawnInterval = 1500;
 
 	/* MAIN LOOP */
 
@@ -47,7 +45,8 @@ int main() {
 
 		// Destroy enemies which has moved offscreen
 		for (int i = enemies.size() - 1; i >= 0; i--) {
-			if (enemies[i]->position.x > fb.getWidth() + 20) {
+			if (enemies[i]->position.x > fb.getWidth() + 20 - 500) {
+				objects.push_back(new Explosion(elapsedMillis, enemies[i]->position));
 				enemies[i]->die();
 				delete enemies[i];
 				enemies.erase(enemies.begin() + i);
