@@ -1,9 +1,9 @@
 #include "FrameBuffer.h"
 #include <iostream>
 
-FrameBuffer::FrameBuffer(const char* fbPath) {
+FrameBuffer::FrameBuffer(const char* fbFilePath) {
 	// Open frame buffer device
-	fileDescriptor = open(fbPath, O_RDWR);
+	fileDescriptor = open(fbFilePath, O_RDWR);
 	if (!fileDescriptor) {
 		std::cerr << "Error: can't open framebuffer" << std::endl;
 		return;

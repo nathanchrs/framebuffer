@@ -10,11 +10,11 @@
 #include <vector>
 #include "Color.h"
 #include "Point.h"
-#include "./PathSegment.h"
+#include "PathSegment.h"
 
 class FrameBuffer {
 public:
-	FrameBuffer(const char* fbPath);
+	FrameBuffer(const char* fbFilePath);
 	~FrameBuffer();
 
   	void printInfo();

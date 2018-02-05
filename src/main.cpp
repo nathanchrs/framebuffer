@@ -6,6 +6,7 @@
 #include <vector>
 #include <algorithm>
 #include "graphics/FrameBuffer.h"
+#include "graphics/Font.h"
 #include "objects/Renderable.h"
 #include "objects/Enemy.h"
 
@@ -18,6 +19,8 @@ int main() {
 	FrameBuffer fb = FrameBuffer("/dev/fb0");
 	std::vector<Renderable*> objects;
 	std::vector<Enemy*> enemies;
+
+	Font font = Font("a.txt", 0.2);
 
 	long enemySpawnInterval = 200;
 
@@ -66,15 +69,7 @@ int main() {
 		fb.drawLine(Point(100, 200), Point(200, 200), Color(0, 0, 0xff));
 		fb.drawLine(Point(100, 300), Point(200, 200), Color(0xff, 0, 0));
 
-		std::vector<PathSegment> testp;
-		testp.push_back(PathSegment(Point(0, 0), Point(200, 0)));
-		testp.push_back(PathSegment(Point(200, 0), Point(200, 200)));
-		testp.push_back(PathSegment(Point(200, 200), Point(0, 200)));
-		testp.push_back(PathSegment(Point(0, 200), Point(0, 0)));
-		testp.push_back(PathSegment(Point(100, 50), Point(100, 150)));
-		testp.push_back(PathSegment(Point(100, 150), Point(50, 150)));
-		testp.push_back(PathSegment(Point(50, 150), Point(100, 50)));
-		fb.drawPath(Point(50, 50), testp, Color(0xff, 0, 0), Color(0xff, 0xff, 0xff));
+		fb.drawPath(Point(100, 100), font.getCharacterPath('A'), Color(0xff, 0, 0), Color(0xff, 0xff, 0xff));
 
 		// Render drawn graphics on screen
 		fb.output();

@@ -1,7 +1,7 @@
 #ifndef PATH_SEGMENT_H
 #define PATH_SEGMENT_H
 
-#include "./Point.h"
+#include "Point.h"
 
 class PathSegment {
 public:
