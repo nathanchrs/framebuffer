@@ -69,9 +69,19 @@ Font::Font(const char* fontFilePath, double scale) {
 }
 
 std::vector<PathSegment> Font::getCharacterPath(char character) {
-    return characterPaths[character];
+    if (characterPaths.find(character) != characterPaths.end()) {
+        return characterPaths[character];
+    } else {
+        std::vector<PathSegment> emptySegment;
+        return emptySegment;
+    }
 }
 
 long Font::getCharacterWidth(char character) {
-    return characterWidths[character];
+    double SPACE_WIDTH = 16; // TODO: scale this too, make scale a method parameter
+    if (characterWidths.find(character) != characterWidths.end()) {
+        return characterWidths[character];
+    } else {
+        return (long) (SPACE_WIDTH);
+    }
 }

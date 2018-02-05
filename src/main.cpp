@@ -69,7 +69,7 @@ int main() {
 		fb.drawLine(Point(100, 200), Point(200, 200), Color(0, 0, 0xff));
 		fb.drawLine(Point(100, 300), Point(200, 200), Color(0xff, 0, 0));
 
-		fb.drawText(Point(100, 100), "ABABB", font, Color(0xff, 0, 0), Color(0xff, 0xff, 0xff));
+		fb.drawText(Point(100, 100), "ABCDEFGHIJ KLMNOPQRSTUVWXYZ 1234567890", font, Color(0xff, 0, 0), Color(0xff, 0xff, 0xff));
 
 		// Render drawn graphics on screen
 		fb.output();
