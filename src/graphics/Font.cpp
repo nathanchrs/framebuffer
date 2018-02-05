@@ -71,3 +71,7 @@ Font::Font(const char* fontFilePath, double scale) {
 std::vector<PathSegment> Font::getCharacterPath(char character) {
     return characterPaths[character];
 }
+
+long Font::getCharacterWidth(char character) {
+    return characterWidths[character];
+}
