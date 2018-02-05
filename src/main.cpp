@@ -20,7 +20,7 @@ int main() {
 	std::vector<Renderable*> objects;
 	std::vector<Enemy*> enemies;
 
-	Font font = Font("a.txt", 0.2);
+	Font font = Font("font.txt", 1.0);
 
 	long enemySpawnInterval = 200;
 
@@ -70,6 +70,7 @@ int main() {
 		fb.drawLine(Point(100, 300), Point(200, 200), Color(0xff, 0, 0));
 
 		fb.drawPath(Point(100, 100), font.getCharacterPath('A'), Color(0xff, 0, 0), Color(0xff, 0xff, 0xff));
+		fb.drawPath(Point(120, 100), font.getCharacterPath('B'), Color(0xff, 0, 0), Color(0xff, 0xff, 0xff));
 
 		// Render drawn graphics on screen
 		fb.output();

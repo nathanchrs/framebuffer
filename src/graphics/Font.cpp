@@ -60,6 +60,7 @@ Font::Font(const char* fontFilePath, double scale) {
         }
 
         // TODO: format validation
+        std::cout << "read char: " << character[0] << std::endl;
         characterPaths[character[0]] = segments;
         characterWidths[character[0]] = characterWidth + 1;
     }
