@@ -77,11 +77,11 @@ std::vector<PathSegment> Font::getCharacterPath(char character) {
     }
 }
 
-long Font::getCharacterWidth(char character) {
+double Font::getCharacterWidth(char character) {
     double SPACE_WIDTH = 16; // TODO: scale this too, make scale a method parameter
     if (characterWidths.find(character) != characterWidths.end()) {
         return characterWidths[character];
     } else {
-        return (long) (SPACE_WIDTH);
+        return SPACE_WIDTH;
     }
 }

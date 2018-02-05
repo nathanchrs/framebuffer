@@ -5,10 +5,10 @@
 
 class PathSegment {
 public:
-	PathSegment(Point start, Point end) : start(start), end(end) {}
+	PathSegment(Point<double> start, Point<double> end) : start(start), end(end) {}
 
-	Point start;
-	Point end;
+	Point<double> start;
+	Point<double> end;
 };
 
 #endif
