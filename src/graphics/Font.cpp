@@ -1,5 +1,4 @@
 #include "Font.h"
-#include <iostream>
 #include <sstream>
 #include <fstream>
 #include <cmath>
@@ -32,8 +31,6 @@ Font::Font(std::string fontFilePath) {
             std::getline(fin, line);
             std::istringstream closedPath(line);
 
-            std::cout << "line: " << line << std::endl;
-
             Point<double> startingPoint;
             while (closedPath >> dx >> ignoreCharacter >> dy) {
                 if (first) {
@@ -48,17 +45,13 @@ Font::Font(std::string fontFilePath) {
                 accX += dx;
                 accY += dy;
                 if (accX > characterWidth) characterWidth = accX;
-                std::cout << "move: " << accX + dx << "," << accY + dy << std::endl;
             }
             segments.push_back(PathSegment<double>(
                 Point<double>(accX, accY),
                 startingPoint
             ));
-            std::cout << "close to: " << startingPoint.x << "," << startingPoint.y << std::endl;
-            std::cout << "end poly" << std::endl;
         }
 
-        std::cout << "read char: " << character[0] << std::endl;
         characterPaths[character[0]] = Path(segments);
         characterWidths[character[0]] = characterWidth;
     }
