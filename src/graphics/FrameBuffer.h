@@ -7,10 +7,12 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 #include <cstring>
+#include <string>
 #include <vector>
 #include "Color.h"
 #include "Point.h"
 #include "PathSegment.h"
+#include "Font.h"
 
 class FrameBuffer {
 public:
@@ -33,13 +35,14 @@ public:
 
 	void drawLine(Point p1, Point p2, Color color);
 	void drawPath(Point topLeftPosition, std::vector<PathSegment> segments, Color fillColor, Color strokeColor);
+	void drawText(Point topLeftPosition, std::string text, Font &font, Color fillColor, Color strokeColor);
 
-  private:
-	int fileDescriptor;
-	uint8_t *address;
-	uint8_t *backBuffer;
-	struct fb_fix_screeninfo finfo;
-	struct fb_var_screeninfo vinfo;
+	  private:
+		int fileDescriptor;
+		uint8_t *address;
+		uint8_t *backBuffer;
+		struct fb_fix_screeninfo finfo;
+		struct fb_var_screeninfo vinfo;
 };
 
 #endif

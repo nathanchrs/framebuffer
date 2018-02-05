@@ -11,6 +11,7 @@ public:
 	Font(const char* fontFilePath, double scale);
 
   	std::vector<PathSegment> getCharacterPath(char character);
+	long getCharacterWidth(char character);
 
   private:
 	std::map<char, std::vector<PathSegment> > characterPaths;

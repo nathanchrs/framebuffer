@@ -276,3 +276,12 @@ void FrameBuffer::drawPath(Point topLeftPosition, std::vector<PathSegment> segme
 	// Free temporary drawing area
 	delete[] buf;
 }
+
+void FrameBuffer::drawText(Point topLeftPosition, std::string text, Font &font, Color fillColor, Color strokeColor) {
+	const long LETTER_SPACING = 6;
+	long accX = topLeftPosition.x;
+	for (size_t i = 0; i < text.length(); i++) {
+		drawPath(Point(accX, topLeftPosition.y), font.getCharacterPath(text[i]), fillColor, strokeColor);
+		accX += font.getCharacterWidth(text[i]) + LETTER_SPACING;
+	}
+}
