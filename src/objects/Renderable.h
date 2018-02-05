@@ -6,10 +6,14 @@
 
 class Renderable {
 public:
-	Renderable(long elapsedMillis, Point position) : createdAt(elapsedMillis), prevElapsedMillis(elapsedMillis), position(position) {}
+	Renderable(long elapsedMillis, Point position) : createdAt(elapsedMillis), prevElapsedMillis(elapsedMillis), position(position), isAlive(true) {}
 	virtual ~Renderable() = 0;
 
-	virtual void render(FrameBuffer &fb, long elapsedMillis) = 0;
+	virtual void update(long elapsedMillis) = 0;
+	virtual void render(FrameBuffer &fb) = 0;
+	virtual void die() {
+		isAlive = false;	
+	};
 
 	long getAge(long elapsedMillis) { return elapsedMillis - createdAt; }
 
@@ -22,6 +26,7 @@ public:
 	long createdAt;
 	long prevElapsedMillis;
 	Point position;
+	bool isAlive;
 };
 
 #endif

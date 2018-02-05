@@ -9,6 +9,7 @@
 #include "graphics/Font.h"
 #include "objects/Renderable.h"
 #include "objects/Enemy.h"
+#include "objects/Explosion.h"
 
 #define TOTAL_DURATION 10000
 
@@ -22,7 +23,9 @@ int main() {
 
 	Font font = Font("font.txt", 1.0);
 
-	long enemySpawnInterval = 200;
+	objects.push_back(new Explosion(0, Point(200, 200)));
+
+	long enemySpawnInterval = 1000;
 
 	/* MAIN LOOP */
 
@@ -45,10 +48,22 @@ int main() {
 		// Destroy enemies which has moved offscreen
 		for (int i = enemies.size() - 1; i >= 0; i--) {
 			if (enemies[i]->position.x > fb.getWidth() + 20) {
-				objects.erase(std::remove(objects.begin(), objects.end(), enemies[i]), objects.end());
+				enemies[i]->die();
 				delete enemies[i];
 				enemies.erase(enemies.begin() + i);
 			}
+		}
+
+		// Garbage collect dead objects
+		for (size_t i = 0; i < objects.size(); i++) {
+			if (!objects[i]->isAlive) {
+				objects.erase(std::remove(objects.begin(), objects.end(), objects[i]), objects.end());
+			}
+		}
+
+		// Update internal state of all objects
+		for (size_t i = 0; i < objects.size(); i++) {
+			objects[i]->update(elapsedMillis);
 		}
 
 		/* RENDER */
@@ -58,7 +73,7 @@ int main() {
 
 		// Draw all objects
 		for (size_t i = 0; i < objects.size(); i++) {
-			objects[i]->render(fb, elapsedMillis);
+			objects[i]->render(fb);
 		}
 
 		// Draw progress bar
@@ -70,6 +85,7 @@ int main() {
 		fb.drawLine(Point(100, 300), Point(200, 200), Color(0xff, 0, 0));
 
 		fb.drawText(Point(100, 100), "ABCDEFGHIJ KLMNOPQRSTUVWXYZ 1234567890", font, Color(0xff, 0, 0), Color(0xff, 0xff, 0xff));
+
 
 		// Render drawn graphics on screen
 		fb.output();
