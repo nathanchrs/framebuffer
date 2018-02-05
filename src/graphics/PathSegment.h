@@ -3,12 +3,13 @@
 
 #include "Point.h"
 
+template<class T>
 class PathSegment {
 public:
-	PathSegment(Point<double> start, Point<double> end) : start(start), end(end) {}
+	PathSegment(Point<T> start, Point<T> end) : start(start), end(end) {}
 
-	Point<double> start;
-	Point<double> end;
+	Point<T> start;
+	Point<T> end;
 };
 
 #endif

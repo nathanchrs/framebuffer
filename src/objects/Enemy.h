@@ -5,7 +5,7 @@
 
 class Enemy : public Renderable {
 public:
-	Enemy(long elapsedMillis, Point position) : Renderable(elapsedMillis, position) {}
+	Enemy(long elapsedMillis, Point<double> position) : Renderable(elapsedMillis, position) {}
 	virtual void update(long elapsedMillis);
 	virtual void render(FrameBuffer& fb);
 };

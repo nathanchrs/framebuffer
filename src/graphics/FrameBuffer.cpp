@@ -1,5 +1,6 @@
 #include "FrameBuffer.h"
 #include <iostream>
+#define EPS 1e-9
 
 FrameBuffer::FrameBuffer(const char* fbFilePath) {
 	// Open frame buffer device
@@ -25,9 +26,6 @@ FrameBuffer::FrameBuffer(const char* fbFilePath) {
 	long screenMemorySize = vinfo.yres_virtual * finfo.line_length;
 	address = (uint8_t*) mmap(0, screenMemorySize, PROT_READ | PROT_WRITE, MAP_SHARED, fileDescriptor, (off_t) 0);
 	backBuffer = new uint8_t[screenMemorySize];
-
-	// Set up options
-	antiAliasing = true;
 }
 
 FrameBuffer::~FrameBuffer() {
@@ -49,7 +47,7 @@ void FrameBuffer::output() {
 	memcpy((uint8_t*) address, backBuffer, getScreenMemorySize());
 }
 
-Color FrameBuffer::getPixel(Point<long> point) {
+Color FrameBuffer::getPixel(Point<long> point) const {
 	if (point.x >= 0 && point.x < vinfo.xres && point.y >= 0 && point.y < vinfo.yres) {
 		long addressOffset = point.x * (vinfo.bits_per_pixel / 8) + (point.y * finfo.line_length);
 		uint32_t colorValue = *((uint32_t *)(backBuffer + addressOffset));
@@ -63,7 +61,7 @@ Color FrameBuffer::getPixel(Point<long> point) {
 	}
 }
 
-void FrameBuffer::setPixel(Point<long> point, Color color) {
+void FrameBuffer::setPixel(Point<long> point, const Color &color) {
 	if (point.x >= 0 && point.x < vinfo.xres && point.y >= 0 && point.y < vinfo.yres) {
 		long addressOffset = point.x * (vinfo.bits_per_pixel / 8) + (point.y * finfo.line_length);
 
@@ -75,32 +73,7 @@ void FrameBuffer::setPixel(Point<long> point, Color color) {
 	}
 }
 
-void FrameBuffer::setPixel(Point<double> point, Color color) {
-	if (antiAliasing) {
-		Point<long> topLeftPixel(floor(point.x), floor(point.y));
-		Point<long> topRightPixel(floor(point.x), ceil(point.y));
-		Point<long> bottomLeftPixel(ceil(point.x), floor(point.y));
-		Point<long> bottomRightPixel(ceil(point.x), ceil(point.y));
-
-		Color topLeftColor = color;
-		Color topRightColor = color;
-		Color bottomLeftColor = color;
-		Color bottomRightColor = color;
-		topLeftColor.a = round(topLeftColor.a * (bottomRightPixel.x - point.x) * (bottomRightPixel.y - point.y));
-		topRightColor.a = round(topRightColor.a * (point.x - bottomLeftPixel.x) * (bottomLeftPixel.y - point.y));
-		bottomLeftColor.a = round(bottomLeftColor.a * (topRightPixel.x - point.x) * (topRightPixel.y - point.y));
-		bottomRightColor.a = round(bottomRightColor.a * (point.x - topLeftPixel.x) * (point.y - topLeftPixel.y));
-
-		setPixel(topLeftPixel, overlayColor(getPixel(topLeftPixel), topLeftColor));
-		setPixel(topRightPixel, overlayColor(getPixel(topRightPixel), topRightColor));
-		setPixel(bottomLeftPixel, overlayColor(getPixel(bottomLeftPixel), bottomLeftColor));
-		setPixel(bottomRightPixel, overlayColor(getPixel(bottomRightPixel), bottomRightColor));
-	} else {
-		setPixel(Point<long>(round(point.x), round(point.y)), color);
-	}
-}
-
-void FrameBuffer::clear(Color color) {
+void FrameBuffer::clear(const Color &color) {
 	for (long x = 0; x < getWidth(); x++) {
 		for (long y = 0; y < getHeight(); y++) {
 			setPixel(Point<long>(x, y), color);
@@ -108,39 +81,37 @@ void FrameBuffer::clear(Color color) {
 	}
 }
 
-// TODO: support antialiasing
-void FrameBuffer::drawCircle(Point<long> center, double r, Color color) {
-	for (long x = center.x - (long) r; x <= center.x + (long) r; x++) {
-		for (long y = center.y - (long) r; y <= center.y + (long) r; y++) {
-			long dx = center.x - x;
-			long dy = center.y - y;
-			if (dx*dx + dy*dy <= (long) (r*r)) {
+void FrameBuffer::drawCircle(Point<double> center, double r, const Color &color) {
+	for (long x = center.x - r; x <= center.x + r; x++) {
+		for (long y = center.y - r; y <= center.y + r; y++) {
+			double dx = center.x - x;
+			double dy = center.y - y;
+			if (dx*dx + dy*dy <= r*r) {
 				setPixel(Point<long>(x, y), color);
 			}
 		}
-	}	
+	}
 }
 
-// TODO: support antialiasing
-void FrameBuffer::drawCircleOutline(Point<long> center, double r, double thickness, Color color) {
-	for (long x = center.x - (long) r; x <= center.x + (long) r; x++) {
-		for (long y = center.y - (long) r; y <= center.y + (long) r; y++) {
-			long dx = center.x - x;
-			long dy = center.y - y;
-			long innerRadius = r - thickness;
-			if ((dx*dx + dy*dy <= (long) (r*r)) && (dx*dx + dy*dy > (long) (innerRadius*innerRadius))) {
+void FrameBuffer::drawCircleOutline(Point<double> center, double r, double thickness, const Color &color) {
+	for (long x = center.x - r; x <= center.x + r; x++) {
+		for (long y = center.y - r; y <= center.y + r; y++) {
+			double dx = center.x - x;
+			double dy = center.y - y;
+			double hypotSquared = dx*dx + dy*dy;
+			double innerRadius = r - thickness;
+			if ((hypotSquared <= r*r) && (hypotSquared > innerRadius*innerRadius)) {
 				setPixel(Point<long>(x, y), color);
 			}
 		}
-	}	
+	}
 }
 
-/* Private helper function for drawing a line using the Bresenham algorithm (doesn't support antialiasing) */
-void FrameBuffer::bresenhamDrawLine(Point<long> p1, Point<long> p2, Color color) {
-	long x0 = p1.x;
-	long y0 = p1.y;
-	long x1 = p2.x;
-	long y1 = p2.y;
+void FrameBuffer::drawLine(Point<double> p1, Point<double> p2, const Color &color) {
+	long x0 = round(p1.x);
+	long y0 = round(p1.y);
+	long x1 = round(p2.x);
+	long y1 = round(p2.y);
 	long dx = (x1 - x0 > 0 ? x1 - x0 : x0 - x1), sx = x0 < x1 ? 1 : -1;
 	long dy = -(y1 - y0 > 0 ? y1 - y0 : y0 - y1), sy = y0 < y1 ? 1 : -1;
 	long err = dx + dy, e2; /* error value e_xy */
@@ -157,19 +128,6 @@ void FrameBuffer::bresenhamDrawLine(Point<long> p1, Point<long> p2, Color color)
 			err += dx;
 			y0 += sy;
 		} /* e_xy+e_y < 0 */
-	}
-}
-
-/* Private helper function for drawing a line using the Bresenham algorithm (uses antialiasing) */
-void FrameBuffer::xwDrawLine(Point<double> p1, Point<double> p2, Color color) {
-	// TODO
-}
-
-void FrameBuffer::drawLine(Point<double> p1, Point<double> p2, Color color) {
-	if (antiAliasing) {
-		xwDrawLine(p1, p2, color);
-	} else {
-		bresenhamDrawLine(Point<long>(round(p1.x), round(p1.y)), Point<long>(round(p2.x), round(p2.y)), color);
 	}
 }
 
@@ -198,8 +156,9 @@ void drawLineBuf(uint8_t *buf, long bufWidth, Point<long> p1, Point<long> p2, ui
 	}
 }
 
-void FrameBuffer::drawPath(Point<long> topLeftPosition, std::vector<PathSegment> segments, Color fillColor, Color strokeColor) {
-	if (segments.size() <= 0) return;
+void FrameBuffer::drawPath(Point<double> topLeftPosition, Path path, const Color &fillColor, const Color &strokeColor) {
+	if (path.segments.size() <= 0) return;
+	std::vector<PathSegment<long> > segments = path.getSegmentsWithIntegerCoordinates();
 
 	// Determine bounding box widths (assumes polygon points are relative to (0, 0))
 	long boundingBoxWidth = segments[0].start.x;
@@ -211,7 +170,7 @@ void FrameBuffer::drawPath(Point<long> topLeftPosition, std::vector<PathSegment>
 		if (segments[i].end.y > boundingBoxHeight) boundingBoxHeight = segments[i].end.y;
 	}
 	boundingBoxWidth++;
-	boundingBoxHeight++;	
+	boundingBoxHeight++;
 	long boundingBoxSize = boundingBoxWidth * boundingBoxHeight;
 
 	// Assign temporary drawing area (buf) and initialize
@@ -303,11 +262,11 @@ void FrameBuffer::drawPath(Point<long> topLeftPosition, std::vector<PathSegment>
 		}
 	}
 
-	// Draw stroke pixels and pixels with fill count == 3 in buf to framebuffer
+	// Draw stroke pixels and pixels with enough fill count in buf to framebuffer
 	for (long r = 0; r < boundingBoxHeight; r++) {
 		for (long c = 0; c < boundingBoxWidth; c++) {
 			if (buf[r * boundingBoxWidth + c] & STROKE_MASK) {
-				setPixel(Point<long>(c + topLeftPosition.x, r + topLeftPosition.y), fillColor);
+				setPixel(Point<long>(c + topLeftPosition.x, r + topLeftPosition.y), strokeColor);
 			} else {
 				uint8_t verticalFillCount = (buf[r * boundingBoxWidth + c] & VERTICAL_FILL_COUNT_MASK) >> VERTICAL_FILL_COUNT_OFFSET;
 				uint8_t horizontalFillCount = (buf[r * boundingBoxWidth + c] & HORIZONTAL_FILL_COUNT_MASK) >> HORIZONTAL_FILL_COUNT_OFFSET;
@@ -324,11 +283,6 @@ void FrameBuffer::drawPath(Point<long> topLeftPosition, std::vector<PathSegment>
 	delete[] buf;
 }
 
-void FrameBuffer::drawText(Point topLeftPosition, std::string text, Font &font, Color fillColor, Color strokeColor) {
-	const long LETTER_SPACING = 6;
-	long accX = topLeftPosition.x;
-	for (size_t i = 0; i < text.length(); i++) {
-		drawPath(Point(accX, topLeftPosition.y), font.getCharacterPath(text[i]), fillColor, strokeColor);
-		accX += font.getCharacterWidth(text[i]) + LETTER_SPACING;
-	}
+void FrameBuffer::drawText(Point<double> topLeftPosition, const std::string &text, const Font &font, double size, const Color &fillColor, const Color &strokeColor) {
+	drawPath(topLeftPosition, font.getTextPath(text, size), fillColor, strokeColor);
 }

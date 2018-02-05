@@ -1,19 +1,23 @@
 #ifndef FONT_H
 #define FONT_H
 
-#include <vector>
 #include <map>
+#include "Path.h"
 #include "PathSegment.h"
 
 class Font {
 public:
-	Font(const char* fontFilePath, double scale);
+	Font(std::string fontFilePath);
 
-  	std::vector<PathSegment> getCharacterPath(char character);
-	double getCharacterWidth(char character);
+  	Path getCharacterPath(char character, double size) const;
+	double getCharacterWidth(char character, double size) const;
+	Path getTextPath(const std::string &text, double size) const;
 
-  private:
-	std::map<char, std::vector<PathSegment> > characterPaths;
+	double letterSpacing;
+	double wordSpacing;
+
+private:
+	std::map<char, Path> characterPaths;
 	std::map<char, double> characterWidths;
 };
 

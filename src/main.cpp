@@ -21,7 +21,7 @@ int main() {
 	std::vector<Renderable*> objects;
 	std::vector<Enemy*> enemies;
 
-	Font font = Font("font.txt", 1.0);
+	Font font = Font("font.txt");
 
 	long enemySpawnInterval = 1500;
 
@@ -38,7 +38,7 @@ int main() {
 
 		// Spawn enemies
 		if ((elapsedMillis % enemySpawnInterval) >= 0 && (elapsedMillis % enemySpawnInterval) < millisPerFrame) {
-			Enemy *newEnemy = new Enemy(elapsedMillis, Point(0, 100));
+			Enemy *newEnemy = new Enemy(elapsedMillis, Point<double>(0, 100));
 			objects.push_back(newEnemy);
 			enemies.push_back(newEnemy);
 		}
@@ -76,26 +76,25 @@ int main() {
 		}
 
 		// Draw progress bar
-		fb.drawRectangle(Point(0, 0), Point(elapsedMillis * fb.getWidth() / TOTAL_DURATION, 10), Color(0xff, 0xff, 0xff));
+		fb.drawLine(Point<double>(0, 0), Point<double>(elapsedMillis * fb.getWidth() / TOTAL_DURATION, 0), Color(0xff, 0xff, 0xff));
 
 		// Test draws
-		fb.drawLine(Point(0, 0), Point(100, 200), Color(0, 0xff, 0));
-		fb.drawLine(Point(100, 200), Point(200, 200), Color(0, 0, 0xff));
-		fb.drawLine(Point(100, 300), Point(200, 200), Color(0xff, 0, 0));
+		fb.drawLine(Point<double>(0, 0), Point<double>(100, 200), Color(0, 0xff, 0));
+		fb.drawLine(Point<double>(100, 200), Point<double>(200, 200), Color(0, 0, 0xff));
+		fb.drawLine(Point<double>(100, 300), Point<double>(200, 200), Color(0xff, 0, 0));
 
-    int dataWidth = 31;
-    int dataHeight = 7;
-	  long width = fb.getWidth();
-	  long height = fb.getHeight();
-    int x_text = (width - (dataWidth*20))/2;
-	  int y_text = height - (elapsedMillis * (height + (dataHeight*40 - 15)) / TOTAL_DURATION);
-		fb.drawText(Point(x_text, y_text), "         KELOMPOK EVOS         ", font, Color(0xff, 0, 0), Color(0xff, 0xff, 0xff));
-		fb.drawText(Point(x_text, y_text+60), "JONATHAN CHRISTOPHER   13515001", font, Color(0xff, 0x66, 0), Color(0xff, 0xff, 0xff));
-		fb.drawText(Point(x_text, y_text+90), "ROBBY SYAIFULLAH   13515013", font, Color(0xff, 0xff, 0), Color(0xff, 0xff, 0xff));
-		fb.drawText(Point(x_text, y_text+120), "KEVIN JONATHAN   13515052", font, Color(0, 0xff, 0), Color(0xff, 0xff, 0xff));
-		fb.drawText(Point(x_text, y_text+150), "AFIF BAMBANG P   13515058", font, Color(0, 0, 0xff), Color(0xff, 0xff, 0xff));
-		fb.drawText(Point(x_text, y_text+180), "LAZUARDI FIRDAUS   13515136", font, Color(0xff, 0, 0xff), Color(0xff, 0xff, 0xff));
-
+		int dataWidth = 31;
+		int dataHeight = 7;
+		long width = fb.getWidth();
+		long height = fb.getHeight();
+		int x_text = (width - (dataWidth*20))/2;
+		int y_text = height - (elapsedMillis * (height + (dataHeight*40 - 15)) / TOTAL_DURATION);
+		fb.drawText(Point<double>(x_text, y_text), "         KELOMPOK EVOS         ", font, 1.0, Color(0xff, 0, 0), Color(0xff, 0xff, 0xff));
+		fb.drawText(Point<double>(x_text, y_text+60), "JONATHAN CHRISTOPHER   13515001", font, 1.0, Color(0xff, 0x66, 0), Color(0xff, 0xff, 0xff));
+		fb.drawText(Point<double>(x_text, y_text+90), "ROBBY SYAIFULLAH   13515013", font, 1.0, Color(0xff, 0xff, 0), Color(0xff, 0xff, 0xff));
+		fb.drawText(Point<double>(x_text, y_text+120), "KEVIN JONATHAN   13515052", font, 1.0, Color(0, 0xff, 0), Color(0xff, 0xff, 0xff));
+		fb.drawText(Point<double>(x_text, y_text+150), "AFIF BAMBANG P   13515058", font, 1.0, Color(0, 0, 0xff), Color(0xff, 0xff, 0xff));
+		fb.drawText(Point<double>(x_text, y_text+180), "LAZUARDI FIRDAUS   13515136", font, 1.0, Color(0xff, 0, 0xff), Color(0xff, 0xff, 0xff));
 
 		// Render drawn graphics on screen
 		fb.output();

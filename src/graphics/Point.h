@@ -13,33 +13,32 @@ public:
 	T y;
 
 	T distanceTo(const Point &other) {
-		return sqrt(hypot(other.x - x, other.y - y));
+		return hypot(other.x - x, other.y - y);
 	}
 
-	friend Point<T> operator+(const Point<T> &lhs, const Point<T> &rhs);
-	friend Point<T> operator-(const Point<T> &lhs, const Point<T> &rhs);
-	friend Point<T> operator*(T scalar, const Point<T> &p);
-	friend Point<T> operator*(const Point<T> &p, T scalar);
+	Point<double> toDouble() const {
+		return Point<double>(x, y);
+	}
+
+	Point<long> toLong() const {
+		return Point<long>(x, y);
+	}
+
+	friend Point<T> operator+(const Point<T> &lhs, const Point<T> &rhs) {
+		return Point<T>(lhs.x + rhs.x, lhs.y + rhs.y);
+	}
+
+	friend Point<T> operator-(const Point<T> &lhs, const Point<T> &rhs) {
+		return Point<T>(lhs.x - rhs.x, lhs.y - rhs.y);
+	}
+
+	friend Point<T> operator*(T scalar, const Point<T> &p) {
+		return Point<T>(scalar * p.x, scalar * p.y);
+	}
+
+	friend Point<T> operator*(const Point<T> &p, T scalar) {
+		return scalar * p;
+	}
 };
-
-template <class T>
-Point<T> operator+(const Point<T> &lhs, const Point<T> &rhs) {
-	return Point<T>(lhs.x + rhs.x, lhs.y + rhs.y);
-}
-
-template <class T>
-Point<T> operator-(const Point<T> &lhs, const Point<T> &rhs) {
-	return Point<T>(lhs.x - rhs.x, lhs.y - rhs.y);
-}
-
-template <class T>
-Point<T> operator*(T scalar, const Point<T> &p) {
-	return Point<T>(T * p.x, T * p.y);
-}
-
-template <class T>
-Point<T> operator*(const Point<T> &p, T scalar) {
-	return T * p;
-}
 
 #endif
