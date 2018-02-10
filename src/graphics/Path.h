@@ -17,6 +17,9 @@ public:
 
     Path translate(Point<double> delta) const;
 
+    Path rotate(double rotationAngle, Point<double> origin) const;
+    Path rotate(double rotationAngle) const { return rotate(rotationAngle, Point<double>());}
+
     std::vector<PathSegment<double>> segments;
 };
 
