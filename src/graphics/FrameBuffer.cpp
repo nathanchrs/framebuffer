@@ -158,131 +158,105 @@ void drawLineBuf(uint8_t *buf, long bufWidth, Point<long> p1, Point<long> p2, ui
 
 void FrameBuffer::drawPath(Point<double> topLeftPosition, Path path, const Color &fillColor, const Color &strokeColor) {
 	if (path.segments.size() <= 0) return;
-	std::vector<PathSegment<long> > segments = path.getSegmentsWithIntegerCoordinates();
-
-	// Determine bounding box widths (assumes polygon points are relative to (0, 0))
-	long boundingBoxWidth = segments[0].start.x;
-	long boundingBoxHeight = segments[0].start.y;
+	std::vector<PathSegment<double> > segments = path.segments;
+	
+	//std::cout << "Initiating fill" << std::endl;
+	std::vector<double> inter;
+	
+	// Determine the max and min of y (height) and x
+	double xmin = segments[0].start.x;
+	double xmax = segments[0].start.x;
+	double ymin = segments[0].start.y;
+	double ymax = segments[0].start.y;
 	for (size_t i = 0; i < segments.size(); i++) {
-		if (segments[i].start.x > boundingBoxWidth) boundingBoxWidth = segments[i].start.x;
-		if (segments[i].start.y > boundingBoxHeight) boundingBoxHeight = segments[i].start.y;
-		if (segments[i].end.x > boundingBoxWidth) boundingBoxWidth = segments[i].end.x;
-		if (segments[i].end.y > boundingBoxHeight) boundingBoxHeight = segments[i].end.y;
+	  //std::cout << i << ". (" << segments[i].start.x << "," << segments[i].start.y << ") (" << segments[i].end.x << "," << segments[i].end.y << ")" << std::endl;
+		if (segments[i].start.x > xmax) xmax = segments[i].start.x;
+		if (segments[i].start.x < xmin) xmin = segments[i].start.x;
+		if (segments[i].end.x > xmax) xmax = segments[i].end.x;
+		if (segments[i].end.x < xmin) xmin = segments[i].end.x;
+		if (segments[i].start.y > ymax) ymax = segments[i].start.y;
+		if (segments[i].start.y < ymin) ymin = segments[i].start.y;
+		if (segments[i].end.y > ymax) ymax = segments[i].end.y;
+		if (segments[i].end.y < ymin) ymin = segments[i].end.y;
 	}
-	boundingBoxWidth++;
-	boundingBoxHeight++;
-	long boundingBoxSize = boundingBoxWidth * boundingBoxHeight;
-
-	// Assign temporary drawing area (buf) and initialize
-	uint8_t *buf = new uint8_t[boundingBoxSize];
-	for (long i = 0; i < boundingBoxSize; i++) {
-		buf[i] = 0;
+	//std::cout << "Xmax : " << xmax << std::endl;
+	//std::cout << "Xmin : " << xmin << std::endl;
+	//std::cout << "Ymax : " << ymax << std::endl;
+	//std::cout << "Ymin : " << ymin << std::endl;
+	
+	xmin += topLeftPosition.x;
+	xmax += topLeftPosition.x;
+	ymin += topLeftPosition.y;
+	ymax += topLeftPosition.y;
+	
+	// Do scanline for each horizontal line from y = ymin to y = ymax
+	for (double y = ymin; y <= ymax; y += 1.0) {
+	  //std::cout << "Current y : " << y << std::endl;
+	  double x1, x2, y1, y2, temp;
+	  inter.clear();
+	  
+	  // Determine all intersection point
+	  for (size_t i = 0; i < segments.size(); i++) {
+	    x1 = segments[i].start.x+topLeftPosition.x;
+	    x2 = segments[i].end.x+topLeftPosition.x;
+	    y1 = segments[i].start.y+topLeftPosition.y;
+	    y2 = segments[i].end.y+topLeftPosition.y;
+	    
+	    // Make sure y1 <= y2
+	    if (y2 < y1) {
+        temp=x1;
+        x1=x2;
+        x2=temp;
+        temp=y1;
+        y1=y2;
+        y2=temp;
+	    }
+	    
+	    // If line Y intersect segments[i]
+	    if (y <= y2 && y >= y1) {
+	      double x;
+	      if ((y1 - y2) == 0) {
+	        x = x1;
+	      }
+	      else {
+	        x = ((x2 - x1) * (y - y1)) / (y2 - y1);
+          x = x + x1;
+	      }
+	      if (x <= xmax && x >= xmin) {
+	        inter.push_back(x);
+	        //std::cout << inter.size() << ". " << x << " from line (" << x1 << "," << y1 << ") (" << x2 << "," << y2 << ")" << std::endl;
+	      }
+	    }
+	  }
+	  //std::cout << "Total intersections : " << inter.size() << std::endl;
+	  
+	  // Sort the points
+	  for (size_t i = inter.size()-1; i >= 1; i--) {
+	    for (size_t j = 0; j < i; j++) {
+	      if (inter[j] > inter[i]) {
+	        temp = inter[i];
+	        inter[i] = inter[j];
+	        inter[j] = temp;
+	      }
+	    }
+	  }
+	  //std::cout << "Sorted" << std::endl;  
+	  
+	  // Draw the line
+	  for (size_t i = 0; i < inter.size(); i+=2) {
+	    drawLine(Point<double>(inter[i], y), Point<double>(inter[i+1], y), fillColor);
+	  }
+	  //std::cout << "Fill for y = " << y << " drawn" << std::endl;
 	}
-
-	// buf format: for each pixel,
-	// - Least significant bit (0x01) used to store whether this pixel contains a stroke
-	// - Next 2 bits are used to count number of horizontal fills
-	// - Next 2 bits are used to count number of vertical fills
-	const uint8_t STROKE_MASK = 0b00000001;
-	const uint8_t HORIZONTAL_FILL_COUNT_OFFSET = 1;
-	const uint8_t HORIZONTAL_FILL_COUNT_MASK = 0b00000110;
-	const uint8_t VERTICAL_FILL_COUNT_OFFSET = 3;
-	const uint8_t VERTICAL_FILL_COUNT_MASK = 0b00011000;
-
-	// Draw polygon strokes on buf
+	
+	// Last, draw the outline
 	for (size_t i = 0; i < segments.size(); i++) {
-		drawLineBuf(buf, boundingBoxWidth, segments[i].start, segments[i].end, STROKE_MASK);
+	  drawLine(Point<double>(segments[i].start.x+topLeftPosition.x, segments[i].start.y+topLeftPosition.y), Point<double>(segments[i].end.x+topLeftPosition.x, segments[i].end.y+topLeftPosition.y), strokeColor);
 	}
-
-	// Left->right raster fill
-	for (long r = 0; r < boundingBoxHeight; r++) {
-		long c = 0;
-		bool doFill = false;
-		while (c < boundingBoxWidth) {
-			if (buf[r * boundingBoxWidth + c] & STROKE_MASK) {
-				while (c < boundingBoxWidth && (buf[r * boundingBoxWidth + c] & STROKE_MASK)) {
-					c++;
-				}
-				doFill = !doFill;
-			}
-			if (c >= boundingBoxWidth) break;
-			if (doFill) buf[r * boundingBoxWidth + c] += (1 << HORIZONTAL_FILL_COUNT_OFFSET);
-			c++;
-		}
-	}
-
-	// Right->left raster fill
-	for (long r = 0; r < boundingBoxHeight; r++) {
-		long c = boundingBoxWidth - 1;
-		bool doFill = false;
-		while (c >= 0) {
-			if (buf[r * boundingBoxWidth + c] & STROKE_MASK) {
-				while (c >= 0 && (buf[r * boundingBoxWidth + c] & STROKE_MASK)) {
-					c--;
-				}
-				doFill = !doFill;
-			}
-			if (c < 0) break;
-			if (doFill) buf[r * boundingBoxWidth + c] += (1 << HORIZONTAL_FILL_COUNT_OFFSET);
-			c--;
-		}
-	}
-
-	// Top->bottom raster fill
-	for (long c = 0; c < boundingBoxWidth; c++) {
-		long r = 0;
-		bool doFill = false;
-		while (r < boundingBoxHeight) {
-			if (buf[r * boundingBoxWidth + c] & STROKE_MASK) {
-				while (r < boundingBoxHeight && (buf[r * boundingBoxWidth + c] & STROKE_MASK)) {
-					r++;
-				}
-				doFill = !doFill;
-			}
-			if (r >= boundingBoxHeight) break;
-			if (doFill) buf[r * boundingBoxWidth + c] += (1 << VERTICAL_FILL_COUNT_OFFSET);
-			r++;
-		}
-	}
-
-	// Bottom->top raster fill
-	for (long c = 0; c < boundingBoxWidth; c++) {
-		long r = boundingBoxHeight - 1;
-		bool doFill = false;
-		while (r >= 0) {
-			if (buf[r * boundingBoxWidth + c] & STROKE_MASK) {
-				while (r >= 0 && (buf[r * boundingBoxWidth + c] & STROKE_MASK)) {
-					r--;
-				}
-				doFill = !doFill;
-			}
-			if (r < 0) break;
-			if (doFill) buf[r * boundingBoxWidth + c] += (1 << VERTICAL_FILL_COUNT_OFFSET);
-			r--;
-		}
-	}
-
-	// Draw stroke pixels and pixels with enough fill count in buf to framebuffer
-	for (long r = 0; r < boundingBoxHeight; r++) {
-		for (long c = 0; c < boundingBoxWidth; c++) {
-			if (buf[r * boundingBoxWidth + c] & STROKE_MASK) {
-				setPixel(Point<long>(c + topLeftPosition.x, r + topLeftPosition.y), strokeColor);
-			} else {
-				uint8_t verticalFillCount = (buf[r * boundingBoxWidth + c] & VERTICAL_FILL_COUNT_MASK) >> VERTICAL_FILL_COUNT_OFFSET;
-				uint8_t horizontalFillCount = (buf[r * boundingBoxWidth + c] & HORIZONTAL_FILL_COUNT_MASK) >> HORIZONTAL_FILL_COUNT_OFFSET;
-				if ((verticalFillCount >= 2 && horizontalFillCount >= 1) || (verticalFillCount >= 1 && horizontalFillCount >= 2)) {
-					setPixel(Point<long>(c + topLeftPosition.x, r + topLeftPosition.y), fillColor);
-				} else if (verticalFillCount == 1 && horizontalFillCount == 1) {
-					// TODO: handle special case, perhaps see neighboring pixels
-				}
-			}
-		}
-	}
-
-	// Free temporary drawing area
-	delete[] buf;
+	//std::cout << "Done" << std::endl;
 }
 
 void FrameBuffer::drawText(Point<double> topLeftPosition, const std::string &text, const Font &font, double size, const Color &fillColor, const Color &strokeColor) {
+  //std::cout << std::endl << std::endl << "Print " << text << std::endl;
 	drawPath(topLeftPosition, font.getTextPath(text, size), fillColor, strokeColor);
 }
