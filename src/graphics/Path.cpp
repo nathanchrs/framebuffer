@@ -29,3 +29,27 @@ Path Path::translate(Point<double> delta) const {
     }
     return newPath;
 }
+
+Path Path::rotate(double rotationAngle, Point<double> origin) const{
+	Path newPath(*this);
+	double sinTetha = sin(rotationAngle * M_PI / 180);
+	double cosTetha = cos(rotationAngle * M_PI / 180);
+	double startX;
+	double startY;
+	double endX;
+	double endY;
+
+	for(std::size_t i=0; i < segments.size(); i++) {
+		startX = newPath.segments[i].start.x;
+		startY = newPath.segments[i].start.y;
+		endX = newPath.segments[i].end.x;
+		endY = newPath.segments[i].end.y;
+
+		newPath.segments[i].start.x = ((startX-origin.x)*cosTetha - (startY-origin.y)*sinTetha) + origin.x;
+
+		newPath.segments[i].start.y = ((startX-origin.x)*sinTetha + (startY-origin.y)*cosTetha) + origin.y;
+		newPath.segments[i].end.x = ((endX-origin.x)*cosTetha - (endY-origin.y)*sinTetha) + origin.x;
+		newPath.segments[i].end.y = ((endX-origin.x)*sinTetha + (endY-origin.y)*cosTetha) + origin.y;
+	}
+	return newPath;
+}
