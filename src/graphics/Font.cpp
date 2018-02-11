@@ -47,13 +47,18 @@ Font::Font(std::string fontFilePath) {
                 accY += dy;
                 if (accX > characterWidth) characterWidth = accX;
             }
-            segments.push_back(PathSegment<double>(
+            /*segments.push_back(PathSegment<double>(
                 Point<double>(accX, accY),
                 startingPoint
-            ));
+            ));*/
         }
 
         characterPaths[character[0]] = Path(segments);
+        /*std::cout << "Char " << character[0] << std::endl;
+        for (int i = 0; i < segments.size(); i++) {
+          std::cout << "line (" << segments[i].start.x << "," << segments[i].start.y << ") (" << segments[i].end.x << "," << segments[i].end.y << ")" << std::endl;
+        }
+        std::cout << std::endl;*/
         characterWidths[character[0]] = characterWidth;
     }
 
