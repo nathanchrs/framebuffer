@@ -11,6 +11,7 @@ public:
 	virtual void render(FrameBuffer& fb);
 
 	double propRotation;
+	double wheelDrop;
 	static VectorSprite planeSprite;
 	static VectorSprite propSprite;
 	static VectorSprite wheelSprite;
