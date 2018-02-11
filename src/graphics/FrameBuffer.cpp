@@ -219,7 +219,7 @@ void FrameBuffer::drawPath(Point<double> topLeftPosition, Path path, const Color
 	      if ((y1 - y2) == 0) {
 	        x = x1;
 	          //std::cout << "Found horizontal line (" << segments[i].start.x << "," << segments[i].start.y << ") (" << segments[i].end.x << "," << segments[i].end.y << ")" << std::endl;
-	          PathSegment<double> pred = path.getPredSegment(i);
+	          PathSegment<double> pred = path.getPrevSegment(i);
 	          //std::cout << "Predecessor line: (" << pred.start.x << "," << pred.start.y << ") (" << pred.end.x << "," << pred.end.y << ")" << std::endl;
 	          PathSegment<double> succ = path.getSuccSegment(i);
 	          //std::cout << "Successor line: (" << succ.start.x << "," << succ.start.y << ") (" << succ.end.x << "," << succ.end.y << ")" << std::endl;

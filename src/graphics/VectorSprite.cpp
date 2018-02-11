@@ -89,3 +89,23 @@ VectorSprite VectorSprite::rotate(double rotationAngle, Point<double> origin) co
     transformResult.strokeColors = strokeColors;
     return transformResult;
 }
+
+VectorSprite VectorSprite::mirrorHorizontal(double mirrorX) const {
+    VectorSprite transformResult;
+    for (size_t i = 0; i < paths.size(); i++) {
+        transformResult.paths.push_back(paths[i].mirrorHorizontal(mirrorX));
+    }
+    transformResult.fillColors = fillColors;
+    transformResult.strokeColors = strokeColors;
+    return transformResult;
+}
+
+VectorSprite VectorSprite::mirrorVertical(double mirrorY) const {
+    VectorSprite transformResult;
+    for (size_t i = 0; i < paths.size(); i++) {
+        transformResult.paths.push_back(paths[i].mirrorVertical(mirrorY));
+    }
+    transformResult.fillColors = fillColors;
+    transformResult.strokeColors = strokeColors;
+    return transformResult;
+}

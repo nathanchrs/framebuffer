@@ -2,15 +2,15 @@
 #define PATH_H
 
 #include <vector>
-#include <sstream>
+#include <string>
 #include "Point.h"
 #include "PathSegment.h"
 
 class Path {
 public:
     Path() {}
-	  Path(std::vector<PathSegment<double> > segments) : segments(segments) {}
-	  Path(std::string);
+    Path(std::string filePath);
+    Path(std::vector<PathSegment<double>> segments) : segments(segments) {}
 
     std::vector<PathSegment<long> > getSegmentsWithIntegerCoordinates() const;
 
@@ -18,14 +18,19 @@ public:
     Path scale(double scalingFactor) const { return scale(scalingFactor, Point<double>()); }
 
     Path translate(Point<double> delta) const;
-    
-    PathSegment<double> getPredSegment(size_t index);
-    PathSegment<double> getSuccSegment(size_t index);
 
     Path rotate(double rotationAngle, Point<double> origin) const;
-    Path rotate(double rotationAngle) const { return rotate(rotationAngle, Point<double>());}
+    Path rotate(double rotationAngle) const { return rotate(rotationAngle, Point<double>()); }
 
-    std::vector<PathSegment<double> > segments;
+    Path mirrorHorizontal(double mirrorX) const;
+    Path mirrorHorizontal() const { return mirrorHorizontal(0); }
+    Path mirrorVertical(double mirrorY) const;
+    Path mirrorVertical() const { return mirrorVertical(0); }
+
+    PathSegment<double> getPrevSegment(size_t index);
+    PathSegment<double> getSuccSegment(size_t index);
+
+    std::vector<PathSegment<double>> segments;
 };
 
 #endif

@@ -19,6 +19,11 @@ public:
     VectorSprite rotate(double rotationAngle, Point<double> origin) const;
     VectorSprite rotate(double rotationAngle) const { return rotate(rotationAngle, Point<double>()); }
 
+    VectorSprite mirrorHorizontal(double mirrorX) const;
+    VectorSprite mirrorHorizontal() const {return mirrorHorizontal(0); }
+    VectorSprite mirrorVertical(double mirrorY) const;
+    VectorSprite mirrorVertical() const {return mirrorVertical(0); }
+
     std::vector<Path> paths;
     std::vector<Color> fillColors;
     std::vector<Color> strokeColors;

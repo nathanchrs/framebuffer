@@ -4,6 +4,7 @@
 
 VectorSprite Enemy::planeSprite;
 VectorSprite Enemy::propSprite;
+VectorSprite Enemy::wheelSprite;
 
 void Enemy::update(long elapsedMillis) {
 	scale = easeInQuintic(0.02, 10, getAge(elapsedMillis), 10000);
@@ -12,6 +13,7 @@ void Enemy::update(long elapsedMillis) {
 
 void Enemy::render(FrameBuffer& fb) {
 	fb.drawVectorSprite(position, Enemy::planeSprite.scale(scale));
+
 	fb.drawVectorSprite(position, Enemy::propSprite.scale(scale)
 		.rotate(propRotation)
 		.translate(Point<double>(scale * 130, scale * 6))
@@ -20,4 +22,7 @@ void Enemy::render(FrameBuffer& fb) {
 		.rotate(propRotation)
 		.translate(Point<double>(-scale * 130, scale * 6))
 	);
+
+	fb.drawVectorSprite(position, Enemy::wheelSprite.scale(scale));
+	fb.drawVectorSprite(position, Enemy::wheelSprite.scale(scale).mirrorHorizontal());
 }

@@ -13,6 +13,7 @@ public:
 	double propRotation;
 	static VectorSprite planeSprite;
 	static VectorSprite propSprite;
+	static VectorSprite wheelSprite;
 };
 
 #endif

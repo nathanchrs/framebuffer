@@ -1,6 +1,7 @@
 #include "Path.h"
 #include <cmath>
 #include <fstream>
+#include <sstream>
 #include <iostream>
 #include <stdlib.h>
 
@@ -107,7 +108,26 @@ Path Path::rotate(double rotationAngle, Point<double> origin) const {
 	return newPath;
 }
 
-PathSegment<double> Path::getPredSegment(size_t index) {
+Path Path::mirrorHorizontal(double mirrorX) const {
+    Path newPath(*this);
+    for (std::size_t i = 0; i < segments.size(); i++) {
+        newPath.segments[i].start = Point<double>(-segments[i].start.x + mirrorX * 2, segments[i].start.y);
+        newPath.segments[i].end = Point<double>(-segments[i].end.x + mirrorX * 2, segments[i].end.y);
+    }
+    return newPath;
+}
+
+Path Path::mirrorVertical(double mirrorY) const {
+    Path newPath(*this);
+    for (std::size_t i = 0; i < segments.size(); i++) {
+        newPath.segments[i].start = Point<double>(segments[i].start.x, -segments[i].start.y + mirrorY * 2);
+        newPath.segments[i].end = Point<double>(segments[i].end.x, -segments[i].end.y + mirrorY * 2);
+    }
+    return newPath;
+}
+
+
+PathSegment<double> Path::getPrevSegment(size_t index) {
     if (index > 0 && std::abs(segments[index-1].end.x - segments[index].start.x) < 0.0001
             && std::abs(segments[index-1].end.y - segments[index].start.y) < 0.0001) {
         return segments[index-1];
