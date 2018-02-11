@@ -135,3 +135,61 @@ double easeInOutQuintic(double start, double end, double time, double duration) 
 		return end/2*(time*time*time*time*time + 2) + start;
 	}
 }
+
+double easeInBounce(double start, double end, double time, double duration){
+	if(start > end){
+		return start - (start - easeOutBounce (duration-time, 0, start, duration) + end);
+	}else{
+		return end - easeOutBounce (duration-time, 0, end, duration) + start;
+	}
+}
+
+double easeOutBounce(double start, double end, double time, double duration){
+	time/=duration;
+	if (start > end){
+		if ((time) < (1/2.75f)) {
+			return start - (end + start*(7.5625f*time*time));
+		} else if (time < (2/2.75f)) {
+			float postFix = time-=(1.5f/2.75f);
+			return start - (end + start*(7.5625f*(postFix)*time + .75f));
+		} else if (time < (2.5/2.75)) {
+			float postFix = time-=(2.25f/2.75f);
+			return start - (end + start*(7.5625f*(postFix)*time + .9375f));
+		} else {
+			float postFix = time-=(2.625f/2.75f);
+			return start - (end + start*(7.5625f*(postFix)*time + .984375f));
+		}
+	} else {
+		if ((time) < (1/2.75f)) {
+			return start + end*(7.5625f*time*time);
+		} else if (time < (2/2.75f)) {
+			float postFix = time-=(1.5f/2.75f);
+			return start + end*(7.5625f*(postFix)*time + .75f);
+		} else if (time < (2.5/2.75)) {
+			float postFix = time-=(2.25f/2.75f);
+			return start + end*(7.5625f*(postFix)*time + .9375f);
+		} else {
+			float postFix = time-=(2.625f/2.75f);
+			return start + end*(7.5625f*(postFix)*time + .984375f);
+		}
+	}
+}
+
+double easeInOutBounce(double start, double end, double time, double duration){
+	if(start > end){
+		if (time < duration/2) {
+			return start - (easeInBounce (time*2, 0, start, duration) * .5f + end);
+		}
+		else {
+			return start - (easeOutBounce (time*2-duration, 0, start, duration) * .5f + start*.5f + end);
+		}
+	}
+	else{
+		if (time < duration/2) {
+			return easeInBounce (time*2, 0, end, duration) * .5f + start;
+		}
+		else {
+			return easeOutBounce (time*2-duration, 0, end, duration) * .5f + end*.5f + start;
+		}
+	}
+}

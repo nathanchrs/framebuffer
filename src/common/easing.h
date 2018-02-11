@@ -35,4 +35,8 @@ double easeOutCircular(double start, double end, double time, double duration);
 double easeInOutCircular(double start, double end, double time, double duration);
 */
 
+double easeInBounce(double start, double end, double time, double duration);
+double easeOutBounce(double start, double end, double time, double duration);
+double easeInOutBounce(double start, double end, double time, double duration);
+
 #endif
