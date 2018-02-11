@@ -6,7 +6,7 @@ VectorSprite Enemy::planeSprite;
 VectorSprite Enemy::propSprite;
 
 void Enemy::update(long elapsedMillis) {
-	scale = easeInQuartic(0.1, 10, getAge(elapsedMillis), 10000);
+	scale = easeInQuintic(0.02, 10, getAge(elapsedMillis), 10000);
 	propRotation += 15;
 }
 

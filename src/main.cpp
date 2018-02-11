@@ -25,6 +25,7 @@ int main() {
 	Enemy::planeSprite = VectorSprite("./src/assets/plane.txt");
 	Enemy::propSprite = VectorSprite("./src/assets/prop.txt");
 	Font font = Font("font.txt");
+	Path temp = Path("test.txt");
 
 	long enemySpawnInterval = 10000;
 
@@ -34,6 +35,9 @@ int main() {
 	long elapsedMillis = 0;
 	unsigned char isRunning = 1;
 	while (isRunning) {
+		
+		// Test fill
+	  fb.drawPath(Point<double>(100.0, 100.0), temp, Color(0xff, 0, 0), Color(0xff, 0xff, 0xff));
 
 		// TODO: read input
 		
