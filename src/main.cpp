@@ -7,6 +7,7 @@
 #include <algorithm>
 #include "graphics/FrameBuffer.h"
 #include "graphics/Font.h"
+#include "graphics/VectorSprite.h"
 #include "objects/Renderable.h"
 #include "objects/Enemy.h"
 #include "objects/Explosion.h"
@@ -21,6 +22,7 @@ int main() {
 	std::vector<Renderable*> objects;
 	std::vector<Enemy*> enemies;
 
+	Enemy::sprite = VectorSprite("./src/assets/plane.txt");
 	Font font = Font("font.txt");
 
 	long enemySpawnInterval = 1500;

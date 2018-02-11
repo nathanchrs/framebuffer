@@ -2,6 +2,7 @@
 #define PATH_H
 
 #include <vector>
+#include <string>
 #include "Point.h"
 #include "PathSegment.h"
 
