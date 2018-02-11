@@ -231,14 +231,16 @@ void FrameBuffer::drawPath(Point<double> topLeftPosition, Path path, const Color
 	  //std::cout << "Total intersections : " << inter.size() << std::endl;
 	  
 	  // Sort the points
-	  for (size_t i = inter.size()-1; i >= 1; i--) {
-	    for (size_t j = 0; j < i; j++) {
-	      if (inter[j] > inter[i]) {
-	        temp = inter[i];
-	        inter[i] = inter[j];
-	        inter[j] = temp;
-	      }
-	    }
+	  if (inter.size() > 0) {
+		for (size_t i = inter.size()-1; i >= 1; i--) {
+			for (size_t j = 0; j < i; j++) {
+			if (inter[j] > inter[i]) {
+				temp = inter[i];
+				inter[i] = inter[j];
+				inter[j] = temp;
+			}
+			}
+		}
 	  }
 	  //std::cout << "Sorted" << std::endl;  
 	  
@@ -259,4 +261,10 @@ void FrameBuffer::drawPath(Point<double> topLeftPosition, Path path, const Color
 void FrameBuffer::drawText(Point<double> topLeftPosition, const std::string &text, const Font &font, double size, const Color &fillColor, const Color &strokeColor) {
   //std::cout << std::endl << std::endl << "Print " << text << std::endl;
 	drawPath(topLeftPosition, font.getTextPath(text, size), fillColor, strokeColor);
+}
+
+void FrameBuffer::drawVectorSprite(Point<double> topLeftPosition, const VectorSprite &sprite) {
+	for (size_t i = 0; i < sprite.paths.size(); i++) {
+		drawPath(topLeftPosition, sprite.paths[i], sprite.fillColors[i], sprite.strokeColors[i]);
+	}
 }

@@ -11,6 +11,7 @@
 #include "Color.h"
 #include "Point.h"
 #include "Path.h"
+#include "VectorSprite.h"
 #include "Font.h"
 
 class FrameBuffer {
@@ -35,8 +36,9 @@ public:
 	void drawLine(Point<double> p1, Point<double> p2, const Color &color);
 	void drawPath(Point<double> topLeftPosition, Path path, const Color &fillColor, const Color &strokeColor);
 	void drawText(Point<double> topLeftPosition, const std::string &text, const Font &font, double size, const Color &fillColor, const Color &strokeColor);
+	void drawVectorSprite(Point<double> topLeftPosition, const VectorSprite &sprite);
 
-private:
+  private:
 	bool antiAliasing;
 	int fileDescriptor;
 	uint8_t *address;
