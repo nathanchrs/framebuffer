@@ -22,6 +22,7 @@ int main() {
 	std::vector<Enemy*> enemies;
 
 	Font font = Font("font.txt");
+	Path temp = Path("test.txt");
 
 	long enemySpawnInterval = 1500;
 
@@ -95,6 +96,8 @@ int main() {
 		fb.drawText(Point<double>(x_text, y_text+120), "KEVIN JONATHAN   13515052", font, 1.0, Color(0, 0xff, 0), Color(0xff, 0xff, 0xff));
 		fb.drawText(Point<double>(x_text, y_text+150), "AFIF BAMBANG P   13515058", font, 1.0, Color(0, 0, 0xff), Color(0xff, 0xff, 0xff));
 		fb.drawText(Point<double>(x_text, y_text+180), "LAZUARDI FIRDAUS   13515136", font, 1.0, Color(0xff, 0, 0xff), Color(0xff, 0xff, 0xff));
+		
+	  fb.drawPath(Point<double>(100.0, 100.0), temp, Color(0xff, 0, 0), Color(0xff, 0xff, 0xff));
 
 		// Render drawn graphics on screen
 		fb.output();

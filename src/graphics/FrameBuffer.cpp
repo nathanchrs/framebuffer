@@ -191,7 +191,7 @@ void FrameBuffer::drawPath(Point<double> topLeftPosition, Path path, const Color
 	
 	// Do scanline for each horizontal line from y = ymin to y = ymax
 	for (double y = ymin; y <= ymax; y += 1.0) {
-	  //std::cout << "Current y : " << y << std::endl;
+	  //std::cout << std::endl << "Current y : " << y << std::endl;
 	  double x1, x2, y1, y2, temp;
 	  inter.clear();
 	  
@@ -240,13 +240,13 @@ void FrameBuffer::drawPath(Point<double> topLeftPosition, Path path, const Color
 	      }
 	    }
 	  }
-	  //std::cout << "Sorted" << std::endl;  
+	  //std::cout << "Sorted" << std::endl << std::endl;  
 	  
 	  // Draw the line
-	  for (size_t i = 0; i < inter.size(); i+=2) {
+	  for (size_t i = 0; i < inter.size() && i+1 < inter.size(); i+=2) {
 	    drawLine(Point<double>(inter[i], y), Point<double>(inter[i+1], y), fillColor);
 	  }
-	  //std::cout << "Fill for y = " << y << " drawn" << std::endl;
+	  //std::cout << "Fill for y = " << y << " drawn" << std::endl << std::endl;
 	}
 	
 	// Last, draw the outline

@@ -2,13 +2,15 @@
 #define PATH_H
 
 #include <vector>
+#include <sstream>
 #include "Point.h"
 #include "PathSegment.h"
 
 class Path {
 public:
     Path() {}
-	Path(std::vector<PathSegment<double> > segments) : segments(segments) {}
+	  Path(std::vector<PathSegment<double> > segments) : segments(segments) {}
+	  Path(std::string);
 
     std::vector<PathSegment<long> > getSegmentsWithIntegerCoordinates() const;
 

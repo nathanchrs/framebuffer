@@ -54,11 +54,11 @@ Font::Font(std::string fontFilePath) {
         }
 
         characterPaths[character[0]] = Path(segments);
-        std::cout << "Char " << character[0] << std::endl;
+        /*std::cout << "Char " << character[0] << std::endl;
         for (int i = 0; i < segments.size(); i++) {
           std::cout << "line (" << segments[i].start.x << "," << segments[i].start.y << ") (" << segments[i].end.x << "," << segments[i].end.y << ")" << std::endl;
         }
-        std::cout << std::endl;
+        std::cout << std::endl;*/
         characterWidths[character[0]] = characterWidth;
     }
 
