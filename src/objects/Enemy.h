@@ -10,7 +10,9 @@ public:
 	virtual void update(long elapsedMillis);
 	virtual void render(FrameBuffer& fb);
 
-	static VectorSprite sprite;
+	double propRotation;
+	static VectorSprite planeSprite;
+	static VectorSprite propSprite;
 };
 
 #endif

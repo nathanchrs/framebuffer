@@ -30,7 +30,7 @@ Path Path::translate(Point<double> delta) const {
     return newPath;
 }
 
-Path Path::rotate(double rotationAngle, Point<double> origin) const{
+Path Path::rotate(double rotationAngle, Point<double> origin) const {
 	Path newPath(*this);
 	double sinTetha = sin(rotationAngle * M_PI / 180);
 	double cosTetha = cos(rotationAngle * M_PI / 180);

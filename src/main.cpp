@@ -22,10 +22,11 @@ int main() {
 	std::vector<Renderable*> objects;
 	std::vector<Enemy*> enemies;
 
-	Enemy::sprite = VectorSprite("./src/assets/plane.txt");
+	Enemy::planeSprite = VectorSprite("./src/assets/plane.txt");
+	Enemy::propSprite = VectorSprite("./src/assets/prop.txt");
 	Font font = Font("font.txt");
 
-	long enemySpawnInterval = 1500;
+	long enemySpawnInterval = 10000;
 
 	/* MAIN LOOP */
 
@@ -40,7 +41,7 @@ int main() {
 
 		// Spawn enemies
 		if ((elapsedMillis % enemySpawnInterval) >= 0 && (elapsedMillis % enemySpawnInterval) < millisPerFrame) {
-			Enemy *newEnemy = new Enemy(elapsedMillis, Point<double>(0, 100));
+			Enemy *newEnemy = new Enemy(elapsedMillis, Point<double>(fb.getWidth() / 2, fb.getHeight() / 2));
 			objects.push_back(newEnemy);
 			enemies.push_back(newEnemy);
 		}

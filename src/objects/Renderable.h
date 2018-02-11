@@ -26,6 +26,8 @@ public:
 	long createdAt;
 	long prevElapsedMillis;
 	Point<double> position;
+	double scale;
+	double rotation;
 	bool isAlive;
 };
 

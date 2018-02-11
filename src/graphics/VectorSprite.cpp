@@ -59,3 +59,33 @@ VectorSprite::VectorSprite(std::string filePath) {
 
     fin.close();
 }
+
+VectorSprite VectorSprite::scale(double scalingFactor, Point<double> origin) const {
+    VectorSprite transformResult;
+    for (size_t i = 0; i < paths.size(); i++) {
+        transformResult.paths.push_back(paths[i].scale(scalingFactor, origin));
+    }
+    transformResult.fillColors = fillColors;
+    transformResult.strokeColors = strokeColors;
+    return transformResult;
+}
+
+VectorSprite VectorSprite::translate(Point<double> delta) const {
+    VectorSprite transformResult;
+    for (size_t i = 0; i < paths.size(); i++) {
+        transformResult.paths.push_back(paths[i].translate(delta));
+    }
+    transformResult.fillColors = fillColors;
+    transformResult.strokeColors = strokeColors;
+    return transformResult;
+}
+
+VectorSprite VectorSprite::rotate(double rotationAngle, Point<double> origin) const {
+    VectorSprite transformResult;
+    for (size_t i = 0; i < paths.size(); i++) {
+        transformResult.paths.push_back(paths[i].rotate(rotationAngle, origin));
+    }
+    transformResult.fillColors = fillColors;
+    transformResult.strokeColors = strokeColors;
+    return transformResult;
+}

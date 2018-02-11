@@ -11,6 +11,14 @@ public:
     VectorSprite() {}
     VectorSprite(std::string filePath);
 
+    VectorSprite scale(double scalingFactor, Point<double> origin) const;
+    VectorSprite scale(double scalingFactor) const { return scale(scalingFactor, Point<double>()); }
+
+    VectorSprite translate(Point<double> delta) const;
+
+    VectorSprite rotate(double rotationAngle, Point<double> origin) const;
+    VectorSprite rotate(double rotationAngle) const { return rotate(rotationAngle, Point<double>()); }
+
     std::vector<Path> paths;
     std::vector<Color> fillColors;
     std::vector<Color> strokeColors;
