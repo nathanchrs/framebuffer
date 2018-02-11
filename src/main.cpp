@@ -83,6 +83,9 @@ int main() {
 		fb.drawLine(Point<double>(0, 0), Point<double>(100, 200), Color(0, 0xff, 0));
 		fb.drawLine(Point<double>(100, 200), Point<double>(200, 200), Color(0, 0, 0xff));
 		fb.drawLine(Point<double>(100, 300), Point<double>(200, 200), Color(0xff, 0, 0));
+		
+		// Test fill
+	  fb.drawPath(Point<double>(100.0, 100.0), temp, Color(0xff, 0, 0), Color(0xff, 0xff, 0xff));
 
 		int dataWidth = 31;
 		int dataHeight = 7;
@@ -96,8 +99,6 @@ int main() {
 		fb.drawText(Point<double>(x_text, y_text+120), "KEVIN JONATHAN   13515052", font, 1.0, Color(0, 0xff, 0), Color(0xff, 0xff, 0xff));
 		fb.drawText(Point<double>(x_text, y_text+150), "AFIF BAMBANG P   13515058", font, 1.0, Color(0, 0, 0xff), Color(0xff, 0xff, 0xff));
 		fb.drawText(Point<double>(x_text, y_text+180), "LAZUARDI FIRDAUS   13515136", font, 1.0, Color(0xff, 0, 0xff), Color(0xff, 0xff, 0xff));
-		
-	  fb.drawPath(Point<double>(100.0, 100.0), temp, Color(0xff, 0, 0), Color(0xff, 0xff, 0xff));
 
 		// Render drawn graphics on screen
 		fb.output();

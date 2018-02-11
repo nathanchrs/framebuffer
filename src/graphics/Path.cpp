@@ -2,6 +2,7 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <stdlib.h>
 
 Path::Path(std::string filePath) {
     std::ifstream fin;
@@ -80,4 +81,37 @@ Path Path::translate(Point<double> delta) const {
         newPath.segments[i].end = segments[i].end + delta;
     }
     return newPath;
+}
+
+PathSegment<double> Path::getPredSegment(size_t index) {
+    if (index > 0 && std::abs(segments[index-1].end.x - segments[index].start.x) < 0.0001
+            && std::abs(segments[index-1].end.y - segments[index].start.y) < 0.0001) {
+        return segments[index-1];
+    }
+    else {
+        for (size_t i = 0; i < segments.size(); i++) {
+            if (std::abs(segments[i].end.x - segments[index].start.x) < 0.0001
+                    && std::abs(segments[i].end.y - segments[index].start.y) < 0.0001) {
+                return segments[i];
+            }
+        }
+    }
+    return PathSegment<double>(Point<double>(0.0, 0.0), Point<double>(0.0, 0.0));
+}
+
+PathSegment<double> Path::getSuccSegment(size_t index) {
+    if (index < segments.size() && std::abs(segments[index].end.x - segments[index+1].start.x) < 0.0001
+            && std::abs(segments[index].end.y - segments[index+1].start.y) < 0.0001) {
+        return segments[index+1];
+    }
+    else {
+        for (size_t i = 0; i < segments.size(); i++) {
+            if (std::abs(segments[index].end.x - segments[i].start.x) < 0.0001
+                    && std::abs(segments[index].end.y - segments[i].start.y) < 0.0001) {
+                return segments[i];
+            }
+        }
+    }
+    return PathSegment<double>(Point<double>(0.0, 0.0), Point<double>(0.0, 0.0));
+    
 }

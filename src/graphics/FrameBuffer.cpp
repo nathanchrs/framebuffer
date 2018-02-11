@@ -215,14 +215,28 @@ void FrameBuffer::drawPath(Point<double> topLeftPosition, Path path, const Color
 	    // If line Y intersect segments[i]
 	    if (y <= y2 && y >= y1) {
 	      double x;
+	      bool pushit = true;
 	      if ((y1 - y2) == 0) {
 	        x = x1;
+	          //std::cout << "Found horizontal line (" << segments[i].start.x << "," << segments[i].start.y << ") (" << segments[i].end.x << "," << segments[i].end.y << ")" << std::endl;
+	          PathSegment<double> pred = path.getPredSegment(i);
+	          //std::cout << "Predecessor line: (" << pred.start.x << "," << pred.start.y << ") (" << pred.end.x << "," << pred.end.y << ")" << std::endl;
+	          PathSegment<double> succ = path.getSuccSegment(i);
+	          //std::cout << "Successor line: (" << succ.start.x << "," << succ.start.y << ") (" << succ.end.x << "," << succ.end.y << ")" << std::endl;
+	          if ((pred.start.y < pred.end.y && succ.start.y > succ.end.y) ||
+	              (pred.start.y > pred.end.y && succ.start.y < succ.end.y)) {
+	            //std::cout << "Don't push it!" << std::endl;
+	            pushit = false;
+	          }
+	          //else {
+	            //std::cout << "Push it!" << std::endl;
+	          //}
 	      }
 	      else {
 	        x = ((x2 - x1) * (y - y1)) / (y2 - y1);
           x = x + x1;
 	      }
-	      if (x <= xmax && x >= xmin) {
+	      if (x <= xmax && x >= xmin && pushit) {
 	        inter.push_back(x);
 	        //std::cout << inter.size() << ". " << x << " from line (" << x1 << "," << y1 << ") (" << x2 << "," << y2 << ")" << std::endl;
 	      }
@@ -243,7 +257,7 @@ void FrameBuffer::drawPath(Point<double> topLeftPosition, Path path, const Color
 	  //std::cout << "Sorted" << std::endl << std::endl;  
 	  
 	  // Draw the line
-	  for (size_t i = 0; i < inter.size() && i+1 < inter.size(); i+=2) {
+	  for (size_t i = 0; i < inter.size(); i+=2) {
 	    drawLine(Point<double>(inter[i], y), Point<double>(inter[i+1], y), fillColor);
 	  }
 	  //std::cout << "Fill for y = " << y << " drawn" << std::endl << std::endl;
