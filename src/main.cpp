@@ -25,6 +25,7 @@ int main() {
 	Enemy::planeSprite = VectorSprite("./src/assets/plane.txt");
 	Enemy::propSprite = VectorSprite("./src/assets/prop.txt");
 	Enemy::wheelSprite = VectorSprite("./src/assets/wheel.txt");
+	Enemy::parachuteSprite = VectorSprite("./src/assets/parachute.txt");
 	Font font = Font("font.txt");
 
 	long enemySpawnInterval = 10000;
@@ -81,11 +82,6 @@ int main() {
 
 		// Draw progress bar
 		fb.drawLine(Point<double>(0, 0), Point<double>(elapsedMillis * fb.getWidth() / TOTAL_DURATION, 0), Color(0xff, 0xff, 0xff));
-
-		// Test draws
-		fb.drawLine(Point<double>(0, 0), Point<double>(100, 200), Color(0, 0xff, 0));
-		fb.drawLine(Point<double>(100, 200), Point<double>(200, 200), Color(0, 0, 0xff));
-		fb.drawLine(Point<double>(100, 300), Point<double>(200, 200), Color(0xff, 0, 0));
 
 		int dataWidth = 31;
 		int dataHeight = 7;

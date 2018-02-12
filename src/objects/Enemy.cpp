@@ -5,9 +5,11 @@
 VectorSprite Enemy::planeSprite;
 VectorSprite Enemy::propSprite;
 VectorSprite Enemy::wheelSprite;
+VectorSprite Enemy::parachuteSprite;
 
 void Enemy::update(long elapsedMillis) {
 	scale = easeInQuintic(0.02, 10, getAge(elapsedMillis), 10000);
+	parachuteDrop += 1;
 	if (getAge(elapsedMillis) > 5000) {
 		wheelDrop = easeInQuadratic(0, 100, getAge(elapsedMillis) - 5000, 5000) * 6;
 	}
@@ -15,6 +17,10 @@ void Enemy::update(long elapsedMillis) {
 }
 
 void Enemy::render(FrameBuffer& fb) {
+	fb.drawVectorSprite(Point<double>(300, -400), Enemy::parachuteSprite
+		.translate(Point<double>(0, parachuteDrop))
+	);
+
 	fb.drawVectorSprite(position, Enemy::planeSprite.scale(scale));
 
 	fb.drawVectorSprite(position, Enemy::propSprite.scale(scale)

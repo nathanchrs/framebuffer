@@ -12,9 +12,12 @@ public:
 
 	double propRotation;
 	double wheelDrop;
+	double parachuteScale;
+	double parachuteDrop;
 	static VectorSprite planeSprite;
 	static VectorSprite propSprite;
 	static VectorSprite wheelSprite;
+	static VectorSprite parachuteSprite;
 };
 
 #endif
