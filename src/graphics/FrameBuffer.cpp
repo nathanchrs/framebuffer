@@ -2,6 +2,109 @@
 #include <iostream>
 #define EPS 1e-9
 
+#define INSIDE 0
+#define LEFT 1
+#define RIGHT 2
+#define BOTTOM 4
+#define TOP 8
+
+int computeOutCode(double x, double y, double xmin, double ymin, double xmax, double ymax)
+{
+  int code;
+  code = INSIDE;
+
+  if (x < xmin) {
+    code |= LEFT;
+  }
+	else if (x > xmax) {
+	  code |= RIGHT;
+	}
+  if (y < ymin) {
+    code |= TOP;
+  }
+  else if (y > ymax) {
+    code |= BOTTOM;
+  }
+
+  return code;
+}
+
+bool clipLine(Point<double> &p0, Point<double> &p1, Point<double> topLeft, Point<double> bottomRight)
+{
+  double xmin = topLeft.x;
+  double ymin = topLeft.y;
+  double xmax = bottomRight.x;
+  double ymax = bottomRight.y;  
+  
+	double x0 = p0.x;
+	double y0 = p0.y;
+	double x1 = p1.x;
+	double y1 = p1.y;
+	
+  //std::cout << "Top Left: (" << xmin << "," << ymin << ") (" << xmax << "," << ymax << ")" << std::endl;
+  //std::cout << "Origin: (" << x0 << "," << y0 << ") (" << x1 << "," << y1 << ")" << std::endl;
+	
+	int outcode0 = computeOutCode(x0, y0, xmin, ymin, xmax, ymax);
+	int outcode1 = computeOutCode(x1, y1, xmin, ymin, xmax, ymax);
+	bool accept = false;
+	//std::cout << "Outcode 0: " << outcode0 << ", Outcode 1: " << outcode1 << std::endl;
+
+	while (true) {
+		if (!(outcode0 | outcode1)) {
+			//std::cout << "Trivial accept" << std::endl;
+			accept = true;
+			break;
+		} else if (outcode0 & outcode1) {
+			//std::cout << "Trivial reject" << std::endl;
+			break;
+		} else {
+			double x, y;
+			int outcodeOut = outcode0 ? outcode0 : outcode1;
+			if (outcodeOut & BOTTOM) {
+			  //std::cout << "It's in Bottom" << std::endl;
+				x = x0 + (x1 - x0) * (ymax - y0) / (y1 - y0);
+				y = ymax;
+			} else if (outcodeOut & TOP) {
+			  //std::cout << "It's in Top" << std::endl;
+				x = x0 + (x1 - x0) * (ymin - y0) / (y1 - y0);
+				y = ymin;
+			} else if (outcodeOut & RIGHT) {
+			  //std::cout << "It's in Right" << std::endl;
+				y = y0 + (y1 - y0) * (xmax - x0) / (x1 - x0);
+				x = xmax;
+			} else if (outcodeOut & LEFT) {
+			  //std::cout << "It's in Left" << std::endl;
+				y = y0 + (y1 - y0) * (xmin - x0) / (x1 - x0);
+				x = xmin;
+			}
+
+			if (outcodeOut == outcode0) {
+				x0 = x;
+				y0 = y;
+				outcode0 = computeOutCode(x0, y0, xmin, ymin, xmax, ymax);
+        //std::cout << "P0 changed to (" << x0 << "," << y0 << "), outcode is " << outcode0 << std::endl;
+			} else {
+				x1 = x;
+				y1 = y;
+				outcode1 = computeOutCode(x1, y1, xmin, ymin, xmax, ymax);
+        //std::cout << "P1 changed to (" << x1 << "," << y1 << "), outcode is " << outcode1 << std::endl;
+			}
+		}
+	}
+	if (accept) {
+		//std::cout << "accept" << std::endl;
+		p0.x = x0;
+		p0.y = y0;
+		p1.x = x1;
+		p1.y = y1;
+		return true;
+	}
+	else {
+    //std::cout << "reject" << std::endl;
+	  return false;
+	}
+}
+
 FrameBuffer::FrameBuffer(const char* fbFilePath) {
 	// Open frame buffer device
 	fileDescriptor = open(fbFilePath, O_RDWR);
@@ -108,26 +211,36 @@ void FrameBuffer::drawCircleOutline(Point<double> center, double r, double thick
 }
 
 void FrameBuffer::drawLine(Point<double> p1, Point<double> p2, const Color &color) {
-	long x0 = round(p1.x);
-	long y0 = round(p1.y);
-	long x1 = round(p2.x);
-	long y1 = round(p2.y);
-	long dx = (x1 - x0 > 0 ? x1 - x0 : x0 - x1), sx = x0 < x1 ? 1 : -1;
-	long dy = -(y1 - y0 > 0 ? y1 - y0 : y0 - y1), sy = y0 < y1 ? 1 : -1;
-	long err = dx + dy, e2; /* error value e_xy */
+  Point<double> topLeft = Point<double>(100, 100);
+  Point<double> bottomRight = Point<double>(getWidth()-100, getHeight()-100);
+  /*if (clipLine(p1, p2, topLeft, bottomRight)) {
+    std::cout << "Drawn at: (" << p1.x << "," << p1.y << ") (" << p2.x << "," << p2.y << ")" << std::endl;
+  }
+  else {
+    std::cout << "Not drawn" << std::endl << std::endl;
+  }*/
+  if (clipLine(p1, p2, topLeft, bottomRight)) {
+	  long x0 = round(p1.x);
+	  long y0 = round(p1.y);
+	  long x1 = round(p2.x);
+	  long y1 = round(p2.y);
+	  long dx = (x1 - x0 > 0 ? x1 - x0 : x0 - x1), sx = x0 < x1 ? 1 : -1;
+	  long dy = -(y1 - y0 > 0 ? y1 - y0 : y0 - y1), sy = y0 < y1 ? 1 : -1;
+	  long err = dx + dy, e2; /* error value e_xy */
 
-	while (true) {
-		setPixel(Point<long>(x0, y0), color);
-		if (x0 == x1 && y0 == y1) break;
-		e2 = 2 * err;
-		if (e2 >= dy) {
-			err += dy;
-			x0 += sx;
-		} /* e_xy+e_x > 0 */
-		if (e2 <= dx) {
-			err += dx;
-			y0 += sy;
-		} /* e_xy+e_y < 0 */
+	  while (true) {
+		  setPixel(Point<long>(x0, y0), color);
+		  if (x0 == x1 && y0 == y1) break;
+		  e2 = 2 * err;
+		  if (e2 >= dy) {
+			  err += dy;
+			  x0 += sx;
+		  } /* e_xy+e_x > 0 */
+		  if (e2 <= dx) {
+			  err += dx;
+			  y0 += sy;
+		  } /* e_xy+e_y < 0 */
+	  }
 	}
 }
 
@@ -186,8 +299,8 @@ void FrameBuffer::drawPath(Point<double> topLeftPosition, Path path, const Color
 	
 	xmin += topLeftPosition.x;
 	xmax += topLeftPosition.x;
-	ymin += topLeftPosition.y;
-	ymax += topLeftPosition.y;
+	ymin += topLeftPosition.y < 0 ? 0 : topLeftPosition.y;
+	ymax += topLeftPosition.y > getHeight() ? getHeight() : topLeftPosition.y;
 	
 	// Do scanline for each horizontal line from y = ymin to y = ymax
 	for (double y = ymin; y <= ymax; y += 1.0) {
