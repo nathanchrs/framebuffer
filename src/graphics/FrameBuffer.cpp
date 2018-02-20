@@ -210,15 +210,7 @@ void FrameBuffer::drawCircleOutline(Point<double> center, double r, double thick
 	}
 }
 
-void FrameBuffer::drawLine(Point<double> p1, Point<double> p2, const Color &color) {
-  Point<double> topLeft = Point<double>(100, 100);
-  Point<double> bottomRight = Point<double>(getWidth()-100, getHeight()-100);
-  /*if (clipLine(p1, p2, topLeft, bottomRight)) {
-    std::cout << "Drawn at: (" << p1.x << "," << p1.y << ") (" << p2.x << "," << p2.y << ")" << std::endl;
-  }
-  else {
-    std::cout << "Not drawn" << std::endl << std::endl;
-  }*/
+void FrameBuffer::drawLine(Point<double> p1, Point<double> p2, const Color &color, Point<double> topLeft, Point<double> bottomRight) {
   if (clipLine(p1, p2, topLeft, bottomRight)) {
 	  long x0 = round(p1.x);
 	  long y0 = round(p1.y);
@@ -270,6 +262,11 @@ void drawLineBuf(uint8_t *buf, long bufWidth, Point<long> p1, Point<long> p2, ui
 }
 
 void FrameBuffer::drawPath(Point<double> topLeftPosition, Path path, const Color &fillColor, const Color &strokeColor) {
+  
+  // DUMMY POINT, CONVERT THIS INTO PARAMETER
+  Point<double> topLeftFrame = Point<double>(100.0, 100.0);
+  Point<double> bottomRightFrame = Point<double>(getWidth()-100, getHeight()-100);
+  
 	if (path.segments.size() <= 0) return;
 	std::vector<PathSegment<double> > segments = path.segments;
 	
@@ -277,16 +274,16 @@ void FrameBuffer::drawPath(Point<double> topLeftPosition, Path path, const Color
 	std::vector<double> inter;
 	
 	// Determine the max and min of y (height) and x
-	double xmin = segments[0].start.x;
-	double xmax = segments[0].start.x;
+	//double xmin = segments[0].start.x;
+	//double xmax = segments[0].start.x;
 	double ymin = segments[0].start.y;
 	double ymax = segments[0].start.y;
 	for (size_t i = 0; i < segments.size(); i++) {
 	  //std::cout << i << ". (" << segments[i].start.x << "," << segments[i].start.y << ") (" << segments[i].end.x << "," << segments[i].end.y << ")" << std::endl;
-		if (segments[i].start.x > xmax) xmax = segments[i].start.x;
-		if (segments[i].start.x < xmin) xmin = segments[i].start.x;
-		if (segments[i].end.x > xmax) xmax = segments[i].end.x;
-		if (segments[i].end.x < xmin) xmin = segments[i].end.x;
+		//if (segments[i].start.x > xmax) xmax = segments[i].start.x;
+		//if (segments[i].start.x < xmin) xmin = segments[i].start.x;
+		//if (segments[i].end.x > xmax) xmax = segments[i].end.x;
+		//if (segments[i].end.x < xmin) xmin = segments[i].end.x;
 		if (segments[i].start.y > ymax) ymax = segments[i].start.y;
 		if (segments[i].start.y < ymin) ymin = segments[i].start.y;
 		if (segments[i].end.y > ymax) ymax = segments[i].end.y;
@@ -297,10 +294,10 @@ void FrameBuffer::drawPath(Point<double> topLeftPosition, Path path, const Color
 	//std::cout << "Ymax : " << ymax << std::endl;
 	//std::cout << "Ymin : " << ymin << std::endl;
 	
-	xmin += topLeftPosition.x;
-	xmax += topLeftPosition.x;
-	ymin += topLeftPosition.y < 0 ? 0 : topLeftPosition.y;
-	ymax += topLeftPosition.y > getHeight() ? getHeight() : topLeftPosition.y;
+	//xmin += topLeftPosition.x;
+	//xmax += topLeftPosition.x;
+	ymin += topLeftPosition.y < topLeftFrame.y ? topLeftFrame.y : topLeftPosition.y;
+	ymax += topLeftPosition.y > bottomRightFrame.y ? bottomRightFrame.y : topLeftPosition.y;
 	
 	// Do scanline for each horizontal line from y = ymin to y = ymax
 	for (double y = ymin; y <= ymax; y += 1.0) {
@@ -349,7 +346,7 @@ void FrameBuffer::drawPath(Point<double> topLeftPosition, Path path, const Color
 	        x = ((x2 - x1) * (y - y1)) / (y2 - y1);
           x = x + x1;
 	      }
-	      if (x <= xmax && x >= xmin && pushit) {
+	      if (pushit) {
 	        inter.push_back(x);
 	        //std::cout << inter.size() << ". " << x << " from line (" << x1 << "," << y1 << ") (" << x2 << "," << y2 << ")" << std::endl;
 	      }
@@ -373,14 +370,14 @@ void FrameBuffer::drawPath(Point<double> topLeftPosition, Path path, const Color
 	  
 	  // Draw the line
 	  for (size_t i = 0; i < inter.size(); i+=2) {
-	    drawLine(Point<double>(inter[i], y), Point<double>(inter[i+1], y), fillColor);
+	    drawLine(Point<double>(inter[i], y), Point<double>(inter[i+1], y), fillColor, topLeftFrame, bottomRightFrame);
 	  }
 	  //std::cout << "Fill for y = " << y << " drawn" << std::endl << std::endl;
 	}
 	
 	// Last, draw the outline
 	for (size_t i = 0; i < segments.size(); i++) {
-	  drawLine(Point<double>(segments[i].start.x+topLeftPosition.x, segments[i].start.y+topLeftPosition.y), Point<double>(segments[i].end.x+topLeftPosition.x, segments[i].end.y+topLeftPosition.y), strokeColor);
+	  drawLine(Point<double>(segments[i].start.x+topLeftPosition.x, segments[i].start.y+topLeftPosition.y), Point<double>(segments[i].end.x+topLeftPosition.x, segments[i].end.y+topLeftPosition.y), strokeColor, topLeftFrame, bottomRightFrame);
 	}
 	//std::cout << "Done" << std::endl;
 }

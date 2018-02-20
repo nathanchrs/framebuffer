@@ -81,7 +81,7 @@ int main() {
 		}
 
 		// Draw progress bar
-		fb.drawLine(Point<double>(0, 0), Point<double>(elapsedMillis * fb.getWidth() / TOTAL_DURATION, 0), Color(0xff, 0xff, 0xff));
+		fb.drawLine(Point<double>(0, 0), Point<double>(elapsedMillis * fb.getWidth() / TOTAL_DURATION, 0), Color(0xff, 0xff, 0xff), Point<double>(0, 0), Point<double> (fb.getHeight(), fb.getWidth()));
 
 		int dataWidth = 31;
 		int dataHeight = 7;
