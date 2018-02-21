@@ -5,6 +5,7 @@
 #include <cmath>
 #include <vector>
 #include <algorithm>
+#include "common/Input.h"
 #include "graphics/FrameBuffer.h"
 #include "graphics/Font.h"
 #include "graphics/VectorSprite.h"
@@ -18,45 +19,27 @@ int main() {
 
 	/* INITIALIZATION */
 
-	FrameBuffer fb = FrameBuffer("/dev/fb0");
+	FrameBuffer fb("/dev/fb0");
+	Input input;
 	std::vector<Renderable*> objects;
-	std::vector<Enemy*> enemies;
-
-	Enemy::planeSprite = VectorSprite("./src/assets/plane.txt");
-	Enemy::propSprite = VectorSprite("./src/assets/prop.txt");
-	Enemy::wheelSprite = VectorSprite("./src/assets/wheel.txt");
-	Enemy::parachuteSprite = VectorSprite("./src/assets/parachute.txt");
-	Font font = Font("font.txt");
-
-	long enemySpawnInterval = 10000;
+	
+	Font font("font.txt");
 
 	/* MAIN LOOP */
 
 	long millisPerFrame = 1000 / FPS;
 	long elapsedMillis = 0;
-	unsigned char isRunning = 1;
+	bool isRunning = true;
 	while (isRunning) {
 
-		// TODO: read input
+		/* PROCESS INPUT */
+
+		if (input.getKeyPress('q')) {
+			isRunning = false;
+			break;
+		}
 		
 		/* UPDATE */
-
-		// Spawn enemies
-		if ((elapsedMillis % enemySpawnInterval) >= 0 && (elapsedMillis % enemySpawnInterval) < millisPerFrame) {
-			Enemy *newEnemy = new Enemy(elapsedMillis, Point<double>(fb.getWidth() / 2, fb.getHeight() / 2));
-			objects.push_back(newEnemy);
-			enemies.push_back(newEnemy);
-		}
-
-		// Destroy enemies which has moved offscreen
-		for (int i = enemies.size() - 1; i >= 0; i--) {
-			if (enemies[i]->position.x > fb.getWidth() + 20 - 500) {
-				objects.push_back(new Explosion(elapsedMillis, enemies[i]->position));
-				enemies[i]->die();
-				delete enemies[i];
-				enemies.erase(enemies.begin() + i);
-			}
-		}
 
 		// Garbage collect dead objects
 		for (size_t i = 0; i < objects.size(); i++) {
@@ -80,9 +63,7 @@ int main() {
 			objects[i]->render(fb);
 		}
 
-		// Draw progress bar
-		fb.drawLine(Point<double>(0, 0), Point<double>(elapsedMillis * fb.getWidth() / TOTAL_DURATION, 0), Color(0xff, 0xff, 0xff), Point<double>(0, 0), Point<double> (fb.getHeight(), fb.getWidth()));
-
+		// Draw credits text
 		int dataWidth = 31;
 		int dataHeight = 7;
 		long width = fb.getWidth();
@@ -103,7 +84,6 @@ int main() {
 
 		usleep(millisPerFrame * 1000);
 		elapsedMillis += millisPerFrame;
-		if (elapsedMillis > TOTAL_DURATION) isRunning = 0;
 	}
 
 	/* CLEAN UP */
