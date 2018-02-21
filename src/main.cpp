@@ -24,7 +24,6 @@ int main() {
 	
 	Font font("./src/assets/font.txt");
 	VectorSprite itbBuildings("./src/assets/itb-buildings.txt");
-	VectorSprite itbFacilities("./src/assets/itb-facilities.txt");
 
 	View mapView(0);
 	mapView.source = &itbBuildings;
