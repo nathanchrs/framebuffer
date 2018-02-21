@@ -6,7 +6,7 @@
 
 class Renderable {
 public:
-	Renderable(long elapsedMillis, Point<double> position) : createdAt(elapsedMillis), prevElapsedMillis(elapsedMillis), position(position), isAlive(true) {}
+	Renderable(long elapsedMillis) : createdAt(elapsedMillis), prevElapsedMillis(elapsedMillis), isAlive(true) {}
 	virtual ~Renderable() = 0;
 
 	virtual void update(long elapsedMillis) = 0;
@@ -25,9 +25,6 @@ public:
 
 	long createdAt;
 	long prevElapsedMillis;
-	Point<double> position;
-	double scale;
-	double rotation;
 	bool isAlive;
 };
 

@@ -10,8 +10,7 @@
 #include "graphics/Font.h"
 #include "graphics/VectorSprite.h"
 #include "objects/Renderable.h"
-#include "objects/Enemy.h"
-#include "objects/Explosion.h"
+#include "objects/View.h"
 
 #define TOTAL_DURATION 10000
 
@@ -23,7 +22,14 @@ int main() {
 	Input input;
 	std::vector<Renderable*> objects;
 	
-	Font font("font.txt");
+	Font font("./src/assets/font.txt");
+	VectorSprite itbBuildings("./src/assets/itb-buildings.txt");
+	VectorSprite itbFacilities("./src/assets/itb-facilities.txt");
+
+	View mapView(0);
+	mapView.source = &itbBuildings;
+	mapView.position = Point<double>(100, 100);
+	objects.push_back(&mapView);
 
 	/* MAIN LOOP */
 
@@ -37,8 +43,16 @@ int main() {
 		if (input.getKeyPress('q')) {
 			isRunning = false;
 			break;
+		} else if (input.getKeyPress('w')) {
+			mapView.position.y -= 10;
+		} else if (input.getKeyPress('a')) {
+			mapView.position.x -= 10;
+		} else if (input.getKeyPress('s')) {
+			mapView.position.y += 10;
+		} else if (input.getKeyPress('d')) {
+			mapView.position.x += 10;
 		}
-		
+
 		/* UPDATE */
 
 		// Garbage collect dead objects
