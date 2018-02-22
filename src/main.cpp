@@ -124,10 +124,6 @@ int main() {
 
 	/* CLEAN UP */
 
-	for (size_t i = 0; i < objects.size(); i++) {
-		delete objects[i];
-	}
-
 	fb.clear(Color(0, 0, 0));
 	fb.output();
 
