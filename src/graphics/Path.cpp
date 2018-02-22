@@ -66,11 +66,13 @@ std::vector<PathSegment<long> > Path::getSegmentsWithIntegerCoordinates() const 
     return integerSegments;
 }
 
-Path Path::scale(double scalingFactor, Point<double> origin) const {
+Path Path::scale(Point<double> scalingFactor, Point<double> origin) const {
     Path newPath(*this);
     for (std::size_t i = 0; i < segments.size(); i++) {
-        newPath.segments[i].start = ((segments[i].start - origin) * scalingFactor) + origin;
-        newPath.segments[i].end = ((segments[i].end - origin) * scalingFactor) + origin;
+        newPath.segments[i].start.x = ((segments[i].start.x - origin.x) * scalingFactor.x) + origin.x;
+        newPath.segments[i].start.y = ((segments[i].start.y - origin.y) * scalingFactor.y) + origin.y;
+        newPath.segments[i].end.x = ((segments[i].end.x - origin.x) * scalingFactor.x) + origin.x;
+        newPath.segments[i].end.y = ((segments[i].end.y - origin.y) * scalingFactor.y) + origin.y;
     }
     return newPath;
 }

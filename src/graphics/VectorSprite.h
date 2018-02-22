@@ -11,7 +11,9 @@ public:
     VectorSprite() {}
     VectorSprite(std::string filePath);
 
-    VectorSprite scale(double scalingFactor, Point<double> origin) const;
+    VectorSprite scale(Point<double> scalingFactor, Point<double> origin) const;
+    VectorSprite scale(double scalingFactor, Point<double> origin) const { return scale(Point<double>(scalingFactor, scalingFactor), origin); }
+    VectorSprite scale(Point<double> scalingFactor) const { return scale(scalingFactor, Point<double>()); }
     VectorSprite scale(double scalingFactor) const { return scale(scalingFactor, Point<double>()); }
 
     VectorSprite translate(Point<double> delta) const;

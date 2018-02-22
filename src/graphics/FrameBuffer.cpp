@@ -29,8 +29,7 @@ int computeOutCode(double x, double y, double xmin, double ymin, double xmax, do
   return code;
 }
 
-bool clipLine(Point<double> &p0, Point<double> &p1, Point<double> topLeft, Point<double> bottomRight)
-{
+bool clipLine(Point<double> &p0, Point<double> &p1, Point<double> topLeft, Point<double> bottomRight) {
   double xmin = topLeft.x;
   double ymin = topLeft.y;
   double xmax = bottomRight.x;
@@ -41,14 +40,10 @@ bool clipLine(Point<double> &p0, Point<double> &p1, Point<double> topLeft, Point
 	double x1 = p1.x;
 	double y1 = p1.y;
 	
-  //std::cout << "Top Left: (" << xmin << "," << ymin << ") (" << xmax << "," << ymax << ")" << std::endl;
-  //std::cout << "Origin: (" << x0 << "," << y0 << ") (" << x1 << "," << y1 << ")" << std::endl;
-	
 	int outcode0 = computeOutCode(x0, y0, xmin, ymin, xmax, ymax);
 	int outcode1 = computeOutCode(x1, y1, xmin, ymin, xmax, ymax);
 	bool accept = false;
-	//std::cout << "Outcode 0: " << outcode0 << ", Outcode 1: " << outcode1 << std::endl;
-
+	
 	while (true) {
 		if (!(outcode0 | outcode1)) {
 			//std::cout << "Trivial accept" << std::endl;
@@ -168,11 +163,22 @@ void FrameBuffer::setPixel(Point<long> point, const Color &color) {
 	if (point.x >= 0 && point.x < vinfo.xres && point.y >= 0 && point.y < vinfo.yres) {
 		long addressOffset = point.x * (vinfo.bits_per_pixel / 8) + (point.y * finfo.line_length);
 
-		uint32_t colorValue = (color.r << vinfo.red.offset)
-			| (color.g << vinfo.green.offset)
-			| (color.b << vinfo.blue.offset);
+		if (color.a != 0xff) {
+			Color mixedColor = overlayColor(getPixel(point), color);
 
-		*((uint32_t*)(backBuffer + addressOffset)) = colorValue;
+			uint32_t colorValue = (mixedColor.r << vinfo.red.offset)
+				| (mixedColor.g << vinfo.green.offset)
+				| (mixedColor.b << vinfo.blue.offset);
+
+			*((uint32_t*)(backBuffer + addressOffset)) = colorValue;
+
+		} else {
+			uint32_t colorValue = (color.r << vinfo.red.offset)
+				| (color.g << vinfo.green.offset)
+				| (color.b << vinfo.blue.offset);
+
+			*((uint32_t*)(backBuffer + addressOffset)) = colorValue;
+		}
 	}
 }
 
@@ -261,21 +267,14 @@ void drawLineBuf(uint8_t *buf, long bufWidth, Point<long> p1, Point<long> p2, ui
 	}
 }
 
-void FrameBuffer::drawPath(Point<double> topLeftPosition, Path path, const Color &fillColor, const Color &strokeColor) {
-  
-  // DUMMY POINT, CONVERT THIS INTO PARAMETER
-  Point<double> topLeftFrame = Point<double>(100.0, 100.0);
-  Point<double> bottomRightFrame = Point<double>(getWidth()-100, getHeight()-100);
-  
+void FrameBuffer::drawPathClip(Point<double> topLeftPosition, Path path, const Color &fillColor, const Color &strokeColor, Point<double> clipTopLeft, Point<double> clipBottomRight) {
 	if (path.segments.size() <= 0) return;
 	std::vector<PathSegment<double> > segments = path.segments;
-	
-	//std::cout << "Initiating fill" << std::endl;
 	std::vector<double> inter;
 	
 	// Determine the max and min of y (height) and x
-	//double xmin = segments[0].start.x;
-	//double xmax = segments[0].start.x;
+	// double xmin = segments[0].start.x;
+	// double xmax = segments[0].start.x;
 	double ymin = segments[0].start.y;
 	double ymax = segments[0].start.y;
 	for (size_t i = 0; i < segments.size(); i++) {
@@ -296,8 +295,8 @@ void FrameBuffer::drawPath(Point<double> topLeftPosition, Path path, const Color
 	
 	//xmin += topLeftPosition.x;
 	//xmax += topLeftPosition.x;
-	ymin += topLeftPosition.y < topLeftFrame.y ? topLeftFrame.y : topLeftPosition.y;
-	ymax += topLeftPosition.y > bottomRightFrame.y ? bottomRightFrame.y : topLeftPosition.y;
+	ymin += topLeftPosition.y < clipTopLeft.y ? clipTopLeft.y : topLeftPosition.y;
+	ymax += topLeftPosition.y > clipBottomRight.y ? clipBottomRight.y : topLeftPosition.y;
 	
 	// Do scanline for each horizontal line from y = ymin to y = ymax
 	for (double y = ymin; y <= ymax; y += 1.0) {
@@ -314,12 +313,12 @@ void FrameBuffer::drawPath(Point<double> topLeftPosition, Path path, const Color
 	    
 	    // Make sure y1 <= y2
 	    if (y2 < y1) {
-        temp=x1;
-        x1=x2;
-        x2=temp;
-        temp=y1;
-        y1=y2;
-        y2=temp;
+        temp = x1;
+        x1 = x2;
+        x2 = temp;
+        temp = y1;
+        y1 = y2;
+        y2 = temp;
 	    }
 	    
 	    // If line Y intersect segments[i]
@@ -356,35 +355,49 @@ void FrameBuffer::drawPath(Point<double> topLeftPosition, Path path, const Color
 	  
 	  // Sort the points
 	  if (inter.size() > 0) {
-		for (size_t i = inter.size()-1; i >= 1; i--) {
-			for (size_t j = 0; j < i; j++) {
-			if (inter[j] > inter[i]) {
-				temp = inter[i];
-				inter[i] = inter[j];
-				inter[j] = temp;
+			for (size_t i = inter.size()-1; i >= 1; i--) {
+				for (size_t j = 0; j < i; j++) {
+					if (inter[j] > inter[i]) {
+						temp = inter[i];
+						inter[i] = inter[j];
+						inter[j] = temp;
+					}
+				}
 			}
-			}
-		}
 	  }
 	  //std::cout << "Sorted" << std::endl << std::endl;  
 	  
 	  // Draw the line
 	  for (size_t i = 0; i < inter.size(); i+=2) {
-	    drawLine(Point<double>(inter[i], y), Point<double>(inter[i+1], y), fillColor, topLeftFrame, bottomRightFrame);
+	    drawLine(Point<double>(inter[i], y), Point<double>(inter[i+1], y), fillColor, clipTopLeft, clipBottomRight);
 	  }
 	  //std::cout << "Fill for y = " << y << " drawn" << std::endl << std::endl;
 	}
 	
 	// Last, draw the outline
 	for (size_t i = 0; i < segments.size(); i++) {
-	  drawLine(Point<double>(segments[i].start.x+topLeftPosition.x, segments[i].start.y+topLeftPosition.y), Point<double>(segments[i].end.x+topLeftPosition.x, segments[i].end.y+topLeftPosition.y), strokeColor, topLeftFrame, bottomRightFrame);
+	  drawLine(
+			Point<double>(segments[i].start.x+topLeftPosition.x, segments[i].start.y+topLeftPosition.y),
+			Point<double>(segments[i].end.x+topLeftPosition.x, segments[i].end.y+topLeftPosition.y),
+			strokeColor,
+			clipTopLeft,
+			clipBottomRight
+		);
 	}
-	//std::cout << "Done" << std::endl;
+}
+
+void FrameBuffer::drawPath(Point<double> topLeftPosition, Path path, const Color &fillColor, const Color &strokeColor) {
+	drawPathClip(topLeftPosition, path, fillColor, strokeColor, Point<double>(0, 0), Point<double>(this->getWidth(), this->getHeight()));
 }
 
 void FrameBuffer::drawText(Point<double> topLeftPosition, const std::string &text, const Font &font, double size, const Color &fillColor, const Color &strokeColor) {
-  //std::cout << std::endl << std::endl << "Print " << text << std::endl;
 	drawPath(topLeftPosition, font.getTextPath(text, size), fillColor, strokeColor);
+}
+
+void FrameBuffer::drawVectorSpriteClip(Point<double> topLeftPosition, const VectorSprite &sprite, Point<double> clipTopLeft, Point<double> clipBottomRight) {
+	for (size_t i = 0; i < sprite.paths.size(); i++) {
+		drawPathClip(topLeftPosition, sprite.paths[i], sprite.fillColors[i], sprite.strokeColors[i], clipTopLeft, clipBottomRight);
+	}
 }
 
 void FrameBuffer::drawVectorSprite(Point<double> topLeftPosition, const VectorSprite &sprite) {

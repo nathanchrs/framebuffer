@@ -60,7 +60,7 @@ VectorSprite::VectorSprite(std::string filePath) {
     fin.close();
 }
 
-VectorSprite VectorSprite::scale(double scalingFactor, Point<double> origin) const {
+VectorSprite VectorSprite::scale(Point<double> scalingFactor, Point<double> origin) const {
     VectorSprite transformResult;
     for (size_t i = 0; i < paths.size(); i++) {
         transformResult.paths.push_back(paths[i].scale(scalingFactor, origin));

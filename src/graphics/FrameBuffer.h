@@ -34,8 +34,10 @@ public:
 	void drawCircleOutline(Point<double> center, double r, double thickness, const Color &color);
 
 	void drawLine(Point<double> p1, Point<double> p2, const Color &color, Point<double> topLeft, Point<double> bottomRight);
+	void drawPathClip(Point<double> topLeftPosition, Path path, const Color &fillColor, const Color &strokeColor, Point<double> clipTopLeft, Point<double> clipBottomRight);
 	void drawPath(Point<double> topLeftPosition, Path path, const Color &fillColor, const Color &strokeColor);
 	void drawText(Point<double> topLeftPosition, const std::string &text, const Font &font, double size, const Color &fillColor, const Color &strokeColor);
+	void drawVectorSpriteClip(Point<double> topLeftPosition, const VectorSprite &sprite, Point<double> clipTopLeft, Point<double> clipBottomRight);
 	void drawVectorSprite(Point<double> topLeftPosition, const VectorSprite &sprite);
 
   private:

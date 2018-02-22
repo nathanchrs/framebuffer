@@ -8,6 +8,7 @@
 #include "common/Input.h"
 #include "graphics/FrameBuffer.h"
 #include "graphics/Font.h"
+#include "graphics/PathSegment.h"
 #include "graphics/VectorSprite.h"
 #include "objects/Renderable.h"
 #include "objects/View.h"
@@ -27,8 +28,27 @@ int main() {
 
 	View mapView(0);
 	mapView.source = &itbBuildings;
-	mapView.position = Point<double>(100, 100);
+	mapView.position = Point<double>(0, 0);
+	mapView.size = Point<double>(600, 600);
+	mapView.sourcePosition = Point<double>(0, 0);
+	mapView.sourceSize = Point<double>(600, 600);
 	objects.push_back(&mapView);
+
+	View detailView(0);
+	double detailBoxSize = 200;
+	detailView.source = &itbBuildings;
+	detailView.position = Point<double>(700, 100);
+	detailView.size = Point<double>(500, 500);
+	detailView.sourcePosition = Point<double>(0, 0);
+	detailView.sourceSize = Point<double>(detailBoxSize, detailBoxSize);
+	objects.push_back(&detailView);
+
+	std::vector<PathSegment<double> > detailBoxPathSegments;
+	detailBoxPathSegments.push_back(PathSegment<double>(Point<double>(0, 0), Point<double>(detailBoxSize, 0)));
+	detailBoxPathSegments.push_back(PathSegment<double>(Point<double>(detailBoxSize, 0), Point<double>(detailBoxSize, detailBoxSize)));
+	detailBoxPathSegments.push_back(PathSegment<double>(Point<double>(detailBoxSize, detailBoxSize), Point<double>(0, detailBoxSize)));
+	detailBoxPathSegments.push_back(PathSegment<double>(Point<double>(0, detailBoxSize), Point<double>(0, 0)));
+	Path detailBox(detailBoxPathSegments);
 
 	/* MAIN LOOP */
 
@@ -43,13 +63,13 @@ int main() {
 			isRunning = false;
 			break;
 		} else if (input.getKeyPress('w')) {
-			mapView.position.y -= 10;
+			detailView.sourcePosition.y -= 5;
 		} else if (input.getKeyPress('a')) {
-			mapView.position.x -= 10;
+			detailView.sourcePosition.x -= 5;
 		} else if (input.getKeyPress('s')) {
-			mapView.position.y += 10;
+			detailView.sourcePosition.y += 5;
 		} else if (input.getKeyPress('d')) {
-			mapView.position.x += 10;
+			detailView.sourcePosition.x += 5;
 		}
 
 		/* UPDATE */
@@ -89,6 +109,9 @@ int main() {
 		fb.drawText(Point<double>(x_text, y_text+120), "KEVIN JONATHAN   13515052", font, 1.0, Color(0, 0xff, 0), Color(0xff, 0xff, 0xff));
 		fb.drawText(Point<double>(x_text, y_text+150), "AFIF BAMBANG P   13515058", font, 1.0, Color(0, 0, 0xff), Color(0xff, 0xff, 0xff));
 		fb.drawText(Point<double>(x_text, y_text+180), "LAZUARDI FIRDAUS   13515136", font, 1.0, Color(0xff, 0, 0xff), Color(0xff, 0xff, 0xff));
+
+		// Draw detail box
+		fb.drawPath(detailView.sourcePosition, detailBox, Color(0x55, 0xff, 0, 0), Color(0xff, 0, 0));
 
 		// Render drawn graphics on screen
 		fb.output();

@@ -14,7 +14,9 @@ public:
 
     std::vector<PathSegment<long> > getSegmentsWithIntegerCoordinates() const;
 
-    Path scale(double scalingFactor, Point<double> origin) const;
+    Path scale(Point<double> scalingFactor, Point<double> origin) const;
+    Path scale(double scalingFactor, Point<double> origin) const { return scale(Point<double>(scalingFactor, scalingFactor), origin); }
+    Path scale(Point<double> scalingFactor) const { return scale(scalingFactor, Point<double>()); }
     Path scale(double scalingFactor) const { return scale(scalingFactor, Point<double>()); }
 
     Path translate(Point<double> delta) const;
