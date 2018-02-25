@@ -35,20 +35,12 @@ int main() {
 	objects.push_back(&mapView);
 
 	View detailView(0);
-	double detailBoxSize = 200;
 	detailView.source = &itbBuildings;
 	detailView.position = Point<double>(700, 100);
 	detailView.size = Point<double>(500, 500);
 	detailView.sourcePosition = Point<double>(0, 0);
-	detailView.sourceSize = Point<double>(detailBoxSize, detailBoxSize);
+	detailView.sourceSize = Point<double>(200, 200);
 	objects.push_back(&detailView);
-
-	std::vector<PathSegment<double> > detailBoxPathSegments;
-	detailBoxPathSegments.push_back(PathSegment<double>(Point<double>(0, 0), Point<double>(detailBoxSize, 0)));
-	detailBoxPathSegments.push_back(PathSegment<double>(Point<double>(detailBoxSize, 0), Point<double>(detailBoxSize, detailBoxSize)));
-	detailBoxPathSegments.push_back(PathSegment<double>(Point<double>(detailBoxSize, detailBoxSize), Point<double>(0, detailBoxSize)));
-	detailBoxPathSegments.push_back(PathSegment<double>(Point<double>(0, detailBoxSize), Point<double>(0, 0)));
-	Path detailBox(detailBoxPathSegments);
 
 	/* MAIN LOOP */
 
@@ -70,6 +62,14 @@ int main() {
 			detailView.sourcePosition.y += 5;
 		} else if (input.getKeyPress('d')) {
 			detailView.sourcePosition.x += 5;
+		} else if (input.getKeyPress('z')) {
+			if (detailView.sourceSize.x > 20 && detailView.sourceSize.y > 20) {
+				detailView.sourceSize.x -= 20;
+				detailView.sourceSize.y -= 20;
+			}
+		} else if (input.getKeyPress('x')) {
+			detailView.sourceSize.x += 20;
+			detailView.sourceSize.y += 20;
 		}
 
 		/* UPDATE */
@@ -111,6 +111,12 @@ int main() {
 		fb.drawText(Point<double>(x_text, y_text+180), "LAZUARDI FIRDAUS   13515136", font, 1.0, Color(0xff, 0, 0xff), Color(0xff, 0xff, 0xff));
 
 		// Draw detail box
+		std::vector<PathSegment<double>> detailBoxPathSegments;
+		detailBoxPathSegments.push_back(PathSegment<double>(Point<double>(0, 0), Point<double>(detailView.sourceSize.x, 0)));
+		detailBoxPathSegments.push_back(PathSegment<double>(Point<double>(detailView.sourceSize.x, 0), Point<double>(detailView.sourceSize.x, detailView.sourceSize.y)));
+		detailBoxPathSegments.push_back(PathSegment<double>(Point<double>(detailView.sourceSize.x, detailView.sourceSize.y), Point<double>(0, detailView.sourceSize.y)));
+		detailBoxPathSegments.push_back(PathSegment<double>(Point<double>(0, detailView.sourceSize.y), Point<double>(0, 0)));
+		Path detailBox(detailBoxPathSegments);
 		fb.drawPath(detailView.sourcePosition, detailBox, Color(0x55, 0xff, 0, 0), Color(0xff, 0, 0));
 
 		// Render drawn graphics on screen
