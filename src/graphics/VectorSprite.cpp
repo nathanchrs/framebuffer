@@ -46,10 +46,10 @@ VectorSprite::VectorSprite(std::string filePath) {
                 accX += dx;
                 accY += dy;
             }
-            segments.push_back(PathSegment<double>(
+            /*segments.push_back(PathSegment<double>(
                 Point<double>(accX, accY),
                 startingPoint
-            ));
+            ));*/
         }
 
         paths.push_back(Path(segments));

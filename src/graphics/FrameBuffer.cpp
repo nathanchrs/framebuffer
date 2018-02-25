@@ -7,6 +7,16 @@
 #define RIGHT 2
 #define BOTTOM 4
 #define TOP 8
+#define abs(i) ((i>=0)?(i):(-i))
+
+// Some struct used in scanline
+typedef struct {
+  double ymin;
+  double ymax;
+  double m;
+  double y1;
+  double x1;
+} Bucket;
 
 int computeOutCode(double x, double y, double xmin, double ymin, double xmax, double ymax)
 {
@@ -270,109 +280,128 @@ void drawLineBuf(uint8_t *buf, long bufWidth, Point<long> p1, Point<long> p2, ui
 void FrameBuffer::drawPathClip(Point<double> topLeftPosition, Path path, const Color &fillColor, const Color &strokeColor, Point<double> clipTopLeft, Point<double> clipBottomRight) {
 	if (path.segments.size() <= 0) return;
 	std::vector<PathSegment<double> > segments = path.segments;
+	std::vector<Bucket*> list;
+	std::vector<Bucket*> active;
 	std::vector<double> inter;
+	Bucket all[segments.size()];
 	
-	// Determine the max and min of y (height) and x
-	// double xmin = segments[0].start.x;
-	// double xmax = segments[0].start.x;
-	double ymin = segments[0].start.y;
-	double ymax = segments[0].start.y;
+	//std::cout << "Initiate bucket list" << std::endl;
 	for (size_t i = 0; i < segments.size(); i++) {
 	  //std::cout << i << ". (" << segments[i].start.x << "," << segments[i].start.y << ") (" << segments[i].end.x << "," << segments[i].end.y << ")" << std::endl;
-		//if (segments[i].start.x > xmax) xmax = segments[i].start.x;
-		//if (segments[i].start.x < xmin) xmin = segments[i].start.x;
-		//if (segments[i].end.x > xmax) xmax = segments[i].end.x;
-		//if (segments[i].end.x < xmin) xmin = segments[i].end.x;
-		if (segments[i].start.y > ymax) ymax = segments[i].start.y;
-		if (segments[i].start.y < ymin) ymin = segments[i].start.y;
-		if (segments[i].end.y > ymax) ymax = segments[i].end.y;
-		if (segments[i].end.y < ymin) ymin = segments[i].end.y;
+	  if (segments[i].start.y < segments[i].end.y) {
+	    all[i].ymin = segments[i].start.y+topLeftPosition.y;
+	    all[i].ymax = segments[i].end.y+topLeftPosition.y;
+	  }
+	  else {
+	    all[i].ymin = segments[i].end.y+topLeftPosition.y;
+	    all[i].ymax = segments[i].start.y+topLeftPosition.y;
+	  }
+	  all[i].m = (segments[i].end.x - segments[i].start.x) / (segments[i].end.y - segments[i].start.y);
+	  all[i].x1 = segments[i].start.x+topLeftPosition.x;
+	  all[i].y1 = segments[i].start.y+topLeftPosition.y;
+	  //std::cout << "Bucket " << i << " (" << &(all[i]) << ") :" << std::endl;
+	  //std::cout << "    ymin: " << all[i].ymin << std::endl;
+	  //std::cout << "    ymax: " << all[i].ymax << std::endl;
+	  //std::cout << "    m: " << all[i].m << std::endl;
+	  //std::cout << "    x1: " << all[i].x1 << std::endl;
+	  //std::cout << "    y1: " << all[i].y1 << std::endl;
+	  list.push_back(&(all[i]));
 	}
-	//std::cout << "Xmax : " << xmax << std::endl;
-	//std::cout << "Xmin : " << xmin << std::endl;
-	//std::cout << "Ymax : " << ymax << std::endl;
-	//std::cout << "Ymin : " << ymin << std::endl;
 	
-	//xmin += topLeftPosition.x;
-	//xmax += topLeftPosition.x;
-	ymin += topLeftPosition.y < clipTopLeft.y ? clipTopLeft.y : topLeftPosition.y;
-	ymax += topLeftPosition.y > clipBottomRight.y ? clipBottomRight.y : topLeftPosition.y;
 	
-	// Do scanline for each horizontal line from y = ymin to y = ymax
-	for (double y = ymin; y <= ymax; y += 1.0) {
-	  //std::cout << std::endl << "Current y : " << y << std::endl;
-	  double x1, x2, y1, y2, temp;
+	//std::cout << std::endl << "Sorting" << std::endl;
+	for (size_t i = list.size()-1; i >= 1; i--) {
+		for (size_t j = 0; j < i; j++) {
+			if (list[j]->ymin > list[i]->ymin) {
+				Bucket* temp = list[i];
+				list[i] = list[j];
+				list[j] = temp;
+			}
+		}
+	}
+	for (size_t i = 0; i <list.size(); i++) {
+		//std::cout << "List " << i << " (" << list[i] << "): " << list[i]->ymin << std::endl << std::endl;
+	}
+	
+	int curY;
+	if (!list.empty()) curY = list[0]->ymin;
+	
+	for (size_t i = 0; i < list.size(); i++) {
+	  if (curY >= list[i]->ymin || (list[i]->ymin - curY) < 0.0001) {
+	    Bucket* temp = list[i];
+	    list.erase(list.begin() + i);
+	    active.push_back(temp);
+	    i--;
+	  }
+	  else break;
+	}
+	
+	for (size_t i = 0; i < active.size(); i++) {
+	  if (curY >= active[i]->ymax || (active[i]->ymax - curY) < 0.0001) {
+	    active.erase(active.begin() + i);
+	    i--;
+	  }
+	}
+	
+	while (!(list.empty() && active.empty())) {
+	  /*std::cout << std::endl << "Current Y = " << curY << std::endl;
+	  for (size_t i = 0; i <list.size(); i++) {
+		  std::cout << "List " << i << " (" << list[i] << "): " << list[i]->ymin << std::endl;
+	  }
+	  for (size_t i = 0; i <active.size(); i++) {
+		  std::cout << "Active " << i << " (" << active[i] << "): " << active[i]->ymin << std::endl;
+	  }*/
+	  
 	  inter.clear();
 	  
-	  // Determine all intersection point
-	  for (size_t i = 0; i < segments.size(); i++) {
-	    x1 = segments[i].start.x+topLeftPosition.x;
-	    x2 = segments[i].end.x+topLeftPosition.x;
-	    y1 = segments[i].start.y+topLeftPosition.y;
-	    y2 = segments[i].end.y+topLeftPosition.y;
-	    
-	    // Make sure y1 <= y2
-	    if (y2 < y1) {
-        temp = x1;
-        x1 = x2;
-        x2 = temp;
-        temp = y1;
-        y1 = y2;
-        y2 = temp;
-	    }
-	    
-	    // If line Y intersect segments[i]
-	    if (y <= y2 && y >= y1) {
-	      double x;
-	      bool pushit = true;
-	      if ((y1 - y2) == 0) {
-	        x = x1;
-	          //std::cout << "Found horizontal line (" << segments[i].start.x << "," << segments[i].start.y << ") (" << segments[i].end.x << "," << segments[i].end.y << ")" << std::endl;
-	          PathSegment<double> pred = path.getPrevSegment(i);
-	          //std::cout << "Predecessor line: (" << pred.start.x << "," << pred.start.y << ") (" << pred.end.x << "," << pred.end.y << ")" << std::endl;
-	          PathSegment<double> succ = path.getSuccSegment(i);
-	          //std::cout << "Successor line: (" << succ.start.x << "," << succ.start.y << ") (" << succ.end.x << "," << succ.end.y << ")" << std::endl;
-	          if ((pred.start.y < pred.end.y && succ.start.y > succ.end.y) ||
-	              (pred.start.y > pred.end.y && succ.start.y < succ.end.y)) {
-	            //std::cout << "Don't push it!" << std::endl;
-	            pushit = false;
-	          }
-	          //else {
-	            //std::cout << "Push it!" << std::endl;
-	          //}
-	      }
-	      else {
-	        x = ((x2 - x1) * (y - y1)) / (y2 - y1);
-          x = x + x1;
-	      }
-	      if (pushit) {
-	        inter.push_back(x);
-	        //std::cout << inter.size() << ". " << x << " from line (" << x1 << "," << y1 << ") (" << x2 << "," << y2 << ")" << std::endl;
-	      }
-	    }
+	  for (size_t i = 0; i < active.size(); i++) {
+	    double x = active[i]->m * ((double) curY - active[i]->y1);
+	    x += active[i]->x1;
+	    inter.push_back(x);
+	    //std::cout << "Active number " << i << " intersects at " << x << std::endl;
 	  }
-	  //std::cout << "Total intersections : " << inter.size() << std::endl;
 	  
-	  // Sort the points
 	  if (inter.size() > 0) {
-			for (size_t i = inter.size()-1; i >= 1; i--) {
-				for (size_t j = 0; j < i; j++) {
-					if (inter[j] > inter[i]) {
-						temp = inter[i];
-						inter[i] = inter[j];
-						inter[j] = temp;
-					}
-				}
-			}
+	    for (size_t i = inter.size()-1; i >= 1; i--) {
+		    for (size_t j = 0; j < i; j++) {
+			    if (inter[j] > inter[i]) {
+				    double temp = inter[i];
+				    inter[i] = inter[j];
+				    inter[j] = temp;
+			    }
+		    }
+	    }
 	  }
-	  //std::cout << "Sorted" << std::endl << std::endl;  
 	  
-	  // Draw the line
 	  for (size_t i = 0; i < inter.size(); i+=2) {
-	    drawLine(Point<double>(inter[i], y), Point<double>(inter[i+1], y), fillColor, clipTopLeft, clipBottomRight);
+	    //std::cout << "Draw line at (" << inter[i] << "," << curY << ") (" << inter[i+1] << "," << curY << ")" << std::endl;
+	    drawLine(Point<double>(inter[i], curY), Point<double>(inter[i+1], curY), fillColor, clipTopLeft, clipBottomRight);
 	  }
-	  //std::cout << "Fill for y = " << y << " drawn" << std::endl << std::endl;
+	  
+	  curY++;
+	  
+	  for (size_t i = 0; i < list.size(); i++) {
+	    if (curY >= list[i]->ymin || (list[i]->ymin - curY) < 0.0001) {
+	      Bucket* temp = list[i];
+	      list.erase(list.begin() + i);
+	      active.push_back(temp);
+	      i--;
+	      //std::cout << "Move bucket (" << temp << ") with ymin " << temp->ymin << " into active" << std::endl;
+	    }
+	    else break;
+	  }
+	  
+	  for (size_t i = 0; i < active.size(); i++) {
+	    if (curY >= active[i]->ymax || (active[i]->ymax - curY) < 0.0001) {
+	      //Bucket* temp = active[i];
+	      active.erase(active.begin() + i);
+	      i--;
+	      //std::cout << "Delete bucket (" << temp << ") with ymin " << temp->ymin << std::endl;
+	    }
+	  }
 	}
+	
+	//std::cout << std::endl << "Finished" << std::endl;
 	
 	// Last, draw the outline
 	for (size_t i = 0; i < segments.size(); i++) {

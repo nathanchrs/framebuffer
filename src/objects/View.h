@@ -10,12 +10,16 @@ public:
   View(long elapsedMillis) : Renderable(elapsedMillis) {}
   virtual void update(long elapsedMillis) {}
   virtual void render(FrameBuffer &fb);
+  void zoomIn(double scaleFactor);
+  void zoomOut(double scaleFactor);
+  void updateDetailBox();
 
   Point<double> position;
   Point<double> size;
   VectorSprite *source;
   Point<double> sourcePosition;
   Point<double> sourceSize;
+  Path detailBox;
 };
 
 #endif

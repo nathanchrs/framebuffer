@@ -41,14 +41,16 @@ int main() {
 	detailView.size = Point<double>(500, 500);
 	detailView.sourcePosition = Point<double>(0, 0);
 	detailView.sourceSize = Point<double>(detailBoxSize, detailBoxSize);
-	objects.push_back(&detailView);
 
 	std::vector<PathSegment<double> > detailBoxPathSegments;
-	detailBoxPathSegments.push_back(PathSegment<double>(Point<double>(0, 0), Point<double>(detailBoxSize, 0)));
-	detailBoxPathSegments.push_back(PathSegment<double>(Point<double>(detailBoxSize, 0), Point<double>(detailBoxSize, detailBoxSize)));
-	detailBoxPathSegments.push_back(PathSegment<double>(Point<double>(detailBoxSize, detailBoxSize), Point<double>(0, detailBoxSize)));
+	detailBoxPathSegments.push_back(PathSegment<double>(Point<double>(0, 0), Point<double>(detailBoxSize, 0)));    // 1st: top
+	detailBoxPathSegments.push_back(PathSegment<double>(Point<double>(detailBoxSize, 0), Point<double>(detailBoxSize, detailBoxSize)));    // 2nd: right
+	detailBoxPathSegments.push_back(PathSegment<double>(Point<double>(detailBoxSize, detailBoxSize), Point<double>(0, detailBoxSize)));    // 3rd: bottom
 	detailBoxPathSegments.push_back(PathSegment<double>(Point<double>(0, detailBoxSize), Point<double>(0, 0)));
-	Path detailBox(detailBoxPathSegments);
+	Path detailBox(detailBoxPathSegments);    // 4th: left
+	detailView.detailBox = detailBox;
+	
+	objects.push_back(&detailView);
 
 	/* MAIN LOOP */
 
@@ -70,6 +72,10 @@ int main() {
 			detailView.sourcePosition.y += 5;
 		} else if (input.getKeyPress('d')) {
 			detailView.sourcePosition.x += 5;
+		} else if (input.getKeyPress('z')) {
+			detailView.zoomIn(1.2);
+		} else if (input.getKeyPress('x')) {
+			detailView.zoomOut(1.2);
 		}
 
 		/* UPDATE */
@@ -97,7 +103,7 @@ int main() {
 		}
 
 		// Draw credits text
-		int dataWidth = 31;
+		/*int dataWidth = 31;
 		int dataHeight = 7;
 		long width = fb.getWidth();
 		long height = fb.getHeight();
@@ -108,10 +114,10 @@ int main() {
 		fb.drawText(Point<double>(x_text, y_text+90), "ROBBY SYAIFULLAH   13515013", font, 1.0, Color(0xff, 0xff, 0), Color(0xff, 0xff, 0xff));
 		fb.drawText(Point<double>(x_text, y_text+120), "KEVIN JONATHAN   13515052", font, 1.0, Color(0, 0xff, 0), Color(0xff, 0xff, 0xff));
 		fb.drawText(Point<double>(x_text, y_text+150), "AFIF BAMBANG P   13515058", font, 1.0, Color(0, 0, 0xff), Color(0xff, 0xff, 0xff));
-		fb.drawText(Point<double>(x_text, y_text+180), "LAZUARDI FIRDAUS   13515136", font, 1.0, Color(0xff, 0, 0xff), Color(0xff, 0xff, 0xff));
+		fb.drawText(Point<double>(x_text, y_text+180), "LAZUARDI FIRDAUS   13515136", font, 1.0, Color(0xff, 0, 0xff), Color(0xff, 0xff, 0xff));*/
 
 		// Draw detail box
-		fb.drawPath(detailView.sourcePosition, detailBox, Color(0x55, 0xff, 0, 0), Color(0xff, 0, 0));
+		fb.drawPath(detailView.sourcePosition, detailView.detailBox, Color(0x55, 0xff, 0, 0), Color(0xff, 0, 0));
 
 		// Render drawn graphics on screen
 		fb.output();
