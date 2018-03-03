@@ -6,6 +6,7 @@
 #include <vector>
 #include <algorithm>
 #include "common/Input.h"
+#include "common/Cursor.h"
 #include "graphics/FrameBuffer.h"
 #include "graphics/Font.h"
 #include "graphics/PathSegment.h"
@@ -21,6 +22,7 @@ int main() {
 
 	FrameBuffer fb("/dev/fb0");
 	Input input;
+	Cursor cursor(Point<double>(), Point<double>(fb.getWidth(), fb.getHeight()));
 	std::vector<Renderable*> objects;
 	
 	Font font("./src/assets/font.txt");
@@ -77,6 +79,8 @@ int main() {
 		} else if (input.getKeyPress('x')) {
 			detailView.zoomOut(1.2);
 		}
+
+		detailView.sourcePosition = cursor.getPosition();
 
 		/* UPDATE */
 
