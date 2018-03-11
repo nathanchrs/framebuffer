@@ -6,13 +6,13 @@
 #include <vector>
 #include <algorithm>
 #include "common/Input.h"
-#include "common/Cursor.h"
 #include "graphics/FrameBuffer.h"
 #include "graphics/Font.h"
 #include "graphics/PathSegment.h"
 #include "graphics/VectorSprite.h"
 #include "objects/Renderable.h"
 #include "objects/View.h"
+#include "objects/Crosshair.h"
 
 #define TOTAL_DURATION 10000
 
@@ -22,11 +22,19 @@ int main() {
 
 	FrameBuffer fb("/dev/fb0");
 	Input input;
-	Cursor cursor(Point<double>(), Point<double>(fb.getWidth(), fb.getHeight()));
 	std::vector<Renderable*> objects;
 	
 	Font font("./src/assets/font.txt");
 	VectorSprite itbBuildings("./src/assets/itb-buildings.txt");
+	VectorSprite crossHairSprite("./src/assets/crosshair.txt");
+	Path dot;
+	dot.segments.push_back(PathSegment<double>(Point<double>(-0.95,-0.95), Point<double>(-0.95,1.05)));
+	dot.segments.push_back(PathSegment<double>(Point<double>(-0.95,1.05), Point<double>(1.05,1.05)));
+	dot.segments.push_back(PathSegment<double>(Point<double>(1.05,1.05), Point<double>(1.05,-0.95)));
+	dot.segments.push_back(PathSegment<double>(Point<double>(1.05,-0.95), Point<double>(-0.95,-0.95)));
+	
+	Crosshair crosshair(0, Point<double>(), Point<double>(600, 600));
+	crosshair.source = &crossHairSprite;
 
 	View mapView(0);
 	mapView.source = &itbBuildings;
@@ -53,6 +61,7 @@ int main() {
 	detailView.detailBox = detailBox;
 	
 	objects.push_back(&detailView);
+	objects.push_back(&crosshair);
 
 	/* MAIN LOOP */
 
@@ -80,8 +89,6 @@ int main() {
 			detailView.zoomOut(1.2);
 		}
 
-		detailView.sourcePosition = cursor.getPosition();
-
 		/* UPDATE */
 
 		// Garbage collect dead objects
@@ -94,6 +101,12 @@ int main() {
 		// Update internal state of all objects
 		for (size_t i = 0; i < objects.size(); i++) {
 			objects[i]->update(elapsedMillis);
+		}
+		
+		if (crosshair.isClicked()) {
+		  itbBuildings.paths.push_back(dot.translate(crosshair.position));
+		  itbBuildings.fillColors.push_back(Color(0xff, 0xff, 0xff));
+		  itbBuildings.strokeColors.push_back(Color(0xff, 0xff, 0xff));
 		}
 
 		/* RENDER */
