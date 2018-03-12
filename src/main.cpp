@@ -36,10 +36,13 @@ int main() {
 	dot.segments.push_back(PathSegment<double>(Point<double>(1.05,1.05), Point<double>(1.05,-0.95)));
 	dot.segments.push_back(PathSegment<double>(Point<double>(1.05,-0.95), Point<double>(-0.95,-0.95)));
 
+	Frame frame(0, fb);
+	objects.push_back(&frame);
+
 	View mapView(0);
 	mapView.source = &itbBuildings;
-	mapView.position = Point<double>(10, fb.getHeight()-310);
-	mapView.size = Point<double>(300, 300);
+	mapView.position = Point<double>(frame.thickness, fb.getHeight()-frame.bottomSidebarHeight);
+	mapView.size = Point<double>(frame.sidebarWidth-frame.thickness, frame.bottomSidebarHeight-frame.thickness);
 	mapView.sourcePosition = Point<double>(0, 0);
 	mapView.sourceSize = Point<double>(300, 300);
 	objects.push_back(&mapView);
@@ -47,8 +50,8 @@ int main() {
 	View detailView(0);
 	double detailBoxSize = 50;
 	detailView.source = &itbBuildings;
-	detailView.position = Point<double>(320, 90);
-	detailView.size = Point<double>(fb.getWidth()-330, fb.getHeight()-100);
+	detailView.position = Point<double>(frame.sidebarWidth+frame.thickness, frame.navbarHeight+frame.thickness);
+	detailView.size = Point<double>(fb.getWidth()-frame.sidebarWidth-frame.thickness*2, fb.getHeight()-frame.navbarHeight-frame.thickness*2);
 	detailView.sourcePosition = Point<double>(100, 100);
 	detailView.sourceSize = Point<double>((detailView.size.x/detailView.size.y) * detailBoxSize, detailBoxSize);
 	
@@ -57,9 +60,6 @@ int main() {
 	Crosshair crosshair(0, mapView.position, mapView.position + mapView.size);
 	crosshair.source = &crossHairSprite;
 	objects.push_back(&crosshair);
-	
-	Frame frame(0, fb);
-	objects.push_back(&frame);
 	
 	DetailBox detailbox(0, &detailView, &mapView, Color(0xff, 0, 0));
 	objects.push_back(&detailbox);
@@ -113,7 +113,7 @@ int main() {
 		/* RENDER */
 
 		// Initially clear drawing surface
-		fb.clear(Color(0, 0, 0));
+		fb.clear(Color(0x07, 0x00, 0x1a));
 
 		// Draw all objects
 		for (size_t i = 0; i < objects.size(); i++) {

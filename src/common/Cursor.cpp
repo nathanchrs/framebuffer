@@ -96,8 +96,8 @@ void Cursor::inputHandler() {
             unsigned char *mouseData = (unsigned char*) &inputEvent;
             currentLeftClick = mouseData[0] & 0x1;
             currentRightClick = mouseData[0] & 0x2;
-            position.x += (double) ((char) mouseData[1]);
-            position.y -= (double) ((char) mouseData[2]);
+            position.x += (double) ((char) mouseData[1]) * sensitivity;
+            position.y -= (double) ((char) mouseData[2]) * sensitivity;
 
             clipCursorPosition();
         }

@@ -35,6 +35,7 @@ private:
     Point<double> bottomRightClip;
     int mouseDevice;
     bool active;
+    double sensitivity = 1.2;
 };
 
 #endif

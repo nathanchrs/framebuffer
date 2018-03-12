@@ -12,6 +12,11 @@ public:
   virtual void render(FrameBuffer &fb);
 
   VectorSprite source;
+
+  long thickness = 2;
+  long navbarHeight = 80;
+  long sidebarWidth = 300;
+  long bottomSidebarHeight = 300;
 };
 
 #endif
