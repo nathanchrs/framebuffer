@@ -13,6 +13,7 @@
 #include "objects/Renderable.h"
 #include "objects/View.h"
 #include "objects/Crosshair.h"
+#include "objects/Frame.h"
 
 #define TOTAL_DURATION 10000
 
@@ -25,31 +26,29 @@ int main() {
 	std::vector<Renderable*> objects;
 	
 	Font font("./src/assets/font.txt");
-	VectorSprite itbBuildings("./src/assets/itb-buildings.txt");
+	VectorSprite itbBuildingsReal("./src/assets/itb-buildings.txt");
+	VectorSprite itbBuildings = itbBuildingsReal.scale(0.5, Point<double>());
 	VectorSprite crossHairSprite("./src/assets/crosshair.txt");
 	Path dot;
 	dot.segments.push_back(PathSegment<double>(Point<double>(-0.95,-0.95), Point<double>(-0.95,1.05)));
 	dot.segments.push_back(PathSegment<double>(Point<double>(-0.95,1.05), Point<double>(1.05,1.05)));
 	dot.segments.push_back(PathSegment<double>(Point<double>(1.05,1.05), Point<double>(1.05,-0.95)));
 	dot.segments.push_back(PathSegment<double>(Point<double>(1.05,-0.95), Point<double>(-0.95,-0.95)));
-	
-	Crosshair crosshair(0, Point<double>(), Point<double>(600, 600));
-	crosshair.source = &crossHairSprite;
 
 	View mapView(0);
 	mapView.source = &itbBuildings;
-	mapView.position = Point<double>(0, 0);
-	mapView.size = Point<double>(600, 600);
+	mapView.position = Point<double>(10, fb.getHeight()-310);
+	mapView.size = Point<double>(300, 300);
 	mapView.sourcePosition = Point<double>(0, 0);
-	mapView.sourceSize = Point<double>(600, 600);
+	mapView.sourceSize = Point<double>(300, 300);
 	objects.push_back(&mapView);
 
 	View detailView(0);
-	double detailBoxSize = 200;
+	double detailBoxSize = 50;
 	detailView.source = &itbBuildings;
-	detailView.position = Point<double>(700, 100);
-	detailView.size = Point<double>(500, 500);
-	detailView.sourcePosition = Point<double>(0, 0);
+	detailView.position = Point<double>((fb.getWidth()-fb.getHeight())/2+205, 90);
+	detailView.size = Point<double>(fb.getHeight()-100, fb.getHeight()-100);
+	detailView.sourcePosition = Point<double>(100, 100);
 	detailView.sourceSize = Point<double>(detailBoxSize, detailBoxSize);
 
 	std::vector<PathSegment<double> > detailBoxPathSegments;
@@ -61,7 +60,13 @@ int main() {
 	detailView.detailBox = detailBox;
 	
 	objects.push_back(&detailView);
+	
+	Crosshair crosshair(0, mapView.position, mapView.position + mapView.size);
+	crosshair.source = &crossHairSprite;
 	objects.push_back(&crosshair);
+	
+	Frame frame(0, fb);
+	objects.push_back(&frame);
 
 	/* MAIN LOOP */
 
@@ -104,7 +109,7 @@ int main() {
 		}
 		
 		if (crosshair.isClicked()) {
-		  itbBuildings.paths.push_back(dot.translate(crosshair.position));
+		  itbBuildings.paths.push_back(dot.translate(crosshair.position - mapView.position));
 		  itbBuildings.fillColors.push_back(Color(0xff, 0xff, 0xff));
 		  itbBuildings.strokeColors.push_back(Color(0xff, 0xff, 0xff));
 		}
@@ -134,7 +139,7 @@ int main() {
 		fb.drawText(Point<double>(x_text, y_text+180), "LAZUARDI FIRDAUS   13515136", font, 1.0, Color(0xff, 0, 0xff), Color(0xff, 0xff, 0xff));*/
 
 		// Draw detail box
-		fb.drawPath(detailView.sourcePosition, detailView.detailBox, Color(0x55, 0xff, 0, 0), Color(0xff, 0, 0));
+		fb.drawPath(detailView.sourcePosition + mapView.position, detailView.detailBox, Color(0x55, 0xff, 0, 0), Color(0xff, 0, 0));
 
 		// Render drawn graphics on screen
 		fb.output();
