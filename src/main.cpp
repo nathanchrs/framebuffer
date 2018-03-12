@@ -41,17 +41,17 @@ int main() {
 
 	View mapView(0);
 	mapView.source = &itbBuildings;
-	mapView.position = Point<double>(frame.thickness, fb.getHeight()-frame.bottomSidebarHeight);
-	mapView.size = Point<double>(frame.sidebarWidth-frame.thickness, frame.bottomSidebarHeight-frame.thickness);
+	mapView.position = frame.getBottomNavStart();
+	mapView.size = frame.getBottomNavSize();
 	mapView.sourcePosition = Point<double>(0, 0);
-	mapView.sourceSize = Point<double>(300, 300);
+	mapView.sourceSize = frame.getBottomNavSize();
 	objects.push_back(&mapView);
 
 	View detailView(0);
 	double detailBoxSize = 50;
 	detailView.source = &itbBuildings;
-	detailView.position = Point<double>(frame.sidebarWidth+frame.thickness, frame.navbarHeight+frame.thickness);
-	detailView.size = Point<double>(fb.getWidth()-frame.sidebarWidth-frame.thickness*2, fb.getHeight()-frame.navbarHeight-frame.thickness*2);
+	detailView.position = frame.getContentStart();
+	detailView.size = frame.getContentSize();
 	detailView.sourcePosition = Point<double>(100, 100);
 	detailView.sourceSize = Point<double>((detailView.size.x/detailView.size.y) * detailBoxSize, detailBoxSize);
 	
