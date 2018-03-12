@@ -38,12 +38,14 @@ void View::zoomOut(double scaleFactor) {
 }
 
 void View::updateDetailBox() {
-	detailBox.segments[0].end.x = sourceSize.x;
-	detailBox.segments[1].start.x = sourceSize.x;
-	detailBox.segments[1].end.x = sourceSize.x;
-	detailBox.segments[1].end.y = sourceSize.y;
-	detailBox.segments[2].start.x = sourceSize.x;
-	detailBox.segments[2].start.y = sourceSize.y;
-	detailBox.segments[2].end.y = sourceSize.y;
-	detailBox.segments[3].start.y = sourceSize.y;
+  if (detailBox.segments.size() >= 4) {
+	  detailBox.segments[0].end.x = sourceSize.x;
+	  detailBox.segments[1].start.x = sourceSize.x;
+	  detailBox.segments[1].end.x = sourceSize.x;
+	  detailBox.segments[1].end.y = sourceSize.y;
+	  detailBox.segments[2].start.x = sourceSize.x;
+	  detailBox.segments[2].start.y = sourceSize.y;
+	  detailBox.segments[2].end.y = sourceSize.y;
+	  detailBox.segments[3].start.y = sourceSize.y;
+	}
 }

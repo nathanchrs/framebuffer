@@ -13,6 +13,7 @@
 #include "objects/Renderable.h"
 #include "objects/View.h"
 #include "objects/Crosshair.h"
+#include "objects/DetailBox.h"
 #include "objects/Frame.h"
 
 #define TOTAL_DURATION 10000
@@ -46,18 +47,10 @@ int main() {
 	View detailView(0);
 	double detailBoxSize = 50;
 	detailView.source = &itbBuildings;
-	detailView.position = Point<double>((fb.getWidth()-fb.getHeight())/2+205, 90);
-	detailView.size = Point<double>(fb.getHeight()-100, fb.getHeight()-100);
+	detailView.position = Point<double>(320, 90);
+	detailView.size = Point<double>(fb.getWidth()-330, fb.getHeight()-100);
 	detailView.sourcePosition = Point<double>(100, 100);
-	detailView.sourceSize = Point<double>(detailBoxSize, detailBoxSize);
-
-	std::vector<PathSegment<double> > detailBoxPathSegments;
-	detailBoxPathSegments.push_back(PathSegment<double>(Point<double>(0, 0), Point<double>(detailBoxSize, 0)));    // 1st: top
-	detailBoxPathSegments.push_back(PathSegment<double>(Point<double>(detailBoxSize, 0), Point<double>(detailBoxSize, detailBoxSize)));    // 2nd: right
-	detailBoxPathSegments.push_back(PathSegment<double>(Point<double>(detailBoxSize, detailBoxSize), Point<double>(0, detailBoxSize)));    // 3rd: bottom
-	detailBoxPathSegments.push_back(PathSegment<double>(Point<double>(0, detailBoxSize), Point<double>(0, 0)));
-	Path detailBox(detailBoxPathSegments);    // 4th: left
-	detailView.detailBox = detailBox;
+	detailView.sourceSize = Point<double>((detailView.size.x/detailView.size.y) * detailBoxSize, detailBoxSize);
 	
 	objects.push_back(&detailView);
 	
@@ -67,6 +60,9 @@ int main() {
 	
 	Frame frame(0, fb);
 	objects.push_back(&frame);
+	
+	DetailBox detailbox(0, &detailView, &mapView, Color(0xff, 0, 0));
+	objects.push_back(&detailbox);
 
 	/* MAIN LOOP */
 
@@ -137,9 +133,6 @@ int main() {
 		fb.drawText(Point<double>(x_text, y_text+120), "KEVIN JONATHAN   13515052", font, 1.0, Color(0, 0xff, 0), Color(0xff, 0xff, 0xff));
 		fb.drawText(Point<double>(x_text, y_text+150), "AFIF BAMBANG P   13515058", font, 1.0, Color(0, 0, 0xff), Color(0xff, 0xff, 0xff));
 		fb.drawText(Point<double>(x_text, y_text+180), "LAZUARDI FIRDAUS   13515136", font, 1.0, Color(0xff, 0, 0xff), Color(0xff, 0xff, 0xff));*/
-
-		// Draw detail box
-		fb.drawPath(detailView.sourcePosition + mapView.position, detailView.detailBox, Color(0x55, 0xff, 0, 0), Color(0xff, 0, 0));
 
 		// Render drawn graphics on screen
 		fb.output();

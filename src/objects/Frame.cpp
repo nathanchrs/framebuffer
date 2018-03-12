@@ -1,3 +1,4 @@
+#include <math.h>
 #include "Frame.h"
 
 Frame::Frame(long elapsedMillis, FrameBuffer &fb) : Renderable(elapsedMillis) {
@@ -33,6 +34,16 @@ Frame::Frame(long elapsedMillis, FrameBuffer &fb) : Renderable(elapsedMillis) {
 	source.paths.push_back(box);
 	source.fillColors.push_back(Color(0xff, 0xff, 0xff));
 	source.strokeColors.push_back(Color(0xff, 0xff, 0xff));
+}
+
+void Frame::update(long elapsedMillis) {
+  double frequency = 0.01;
+  source.fillColors[0].r = sin(elapsedMillis*frequency + 0) * 127 + 128;
+  source.strokeColors[0].r = sin(elapsedMillis*frequency + 0) * 127 + 128;
+  source.fillColors[0].g = sin(elapsedMillis*frequency + 2) * 127 + 128;
+  source.strokeColors[0].g = sin(elapsedMillis*frequency + 2) * 127 + 128;
+  source.fillColors[0].b = sin(elapsedMillis*frequency + 4) * 127 + 128;
+  source.strokeColors[0].b = sin(elapsedMillis*frequency + 4) * 127 + 128;
 }
 
 void Frame::render(FrameBuffer &fb) {

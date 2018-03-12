@@ -8,7 +8,7 @@
 class Frame : public Renderable {
 public:
   Frame(long elapsedMillis, FrameBuffer &fb);
-  virtual void update(long elapsedMillis) {}
+  virtual void update(long elapsedMillis);
   virtual void render(FrameBuffer &fb);
 
   VectorSprite source;
