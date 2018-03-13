@@ -104,11 +104,42 @@ int main() {
 		}
 
 		// Update internal state of all objects
-		if (crosshair.isHold()) {
+		if (crosshair.isLeftHold()) {
 		  Point<double> diff = crosshair.diffPosition();
 		  diff.x *= detailView.sourceSize.x/detailView.size.x;
 		  diff.y *= detailView.sourceSize.y/detailView.size.y;
 		  detailView.sourcePosition = detailView.sourcePosition - diff;
+		}
+		if (crosshair.isRightHold()) {
+		  Point<double> prev = crosshair.prevPosition;
+		  Point<double> now = crosshair.position;
+		  Point<double> center = detailView.position + Point<double>(detailView.size.x * 0.5, detailView.size.y * 0.5);
+		  double a1 = atan((now.y - center.y)/(now.x - center.x));
+		  if ((now.x - center.x) < 0 && (now.y - center.y) < 0) {
+		    a1 -= M_PI;
+		  }
+		  else if ((now.x - center.x) < 0 && (now.y - center.y) > 0) {
+		    a1 += M_PI;
+		  }
+		  double a2 = atan((prev.y - center.y)/(prev.x - center.x));
+		  if ((prev.x - center.x) < 0 && (prev.y - center.y) < 0) {
+		    a2 -= M_PI;
+		  }
+		  else if ((prev.x - center.x) < 0 && (prev.y - center.y) > 0) {
+		    a2 += M_PI;
+		  }
+		  double a = (a1-a2 < 0) ? a1-a2 + 2*M_PI : a1-a2;
+		  std::cout << a1 << " " << a2 << " " << a << std::endl;
+		  Point<double> origin = mapView.sourcePosition + Point<double>(mapView.sourceSize.x * 0.5, mapView.sourceSize.x * 0.5);
+		  VectorSprite newSprite = mapView.source->rotate(a * 180/M_PI, origin);
+		  mapView.source->paths = newSprite.paths;
+		  
+	    double sinTetha = sin(a);
+	    double cosTetha = cos(a);
+      double xPos = detailView.sourcePosition.x + detailView.sourceSize.x/2;
+      double yPos = detailView.sourcePosition.y + detailView.sourceSize.y/2;
+		  detailView.sourcePosition.x = ((xPos-origin.x)*cosTetha - (yPos-origin.y)*sinTetha) + origin.x - detailView.sourceSize.x/2;
+		  detailView.sourcePosition.y = ((xPos-origin.x)*sinTetha + (yPos-origin.y)*cosTetha) + origin.y - detailView.sourceSize.y/2;
 		}
 		
 		for (size_t i = 0; i < objects.size(); i++) {

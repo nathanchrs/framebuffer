@@ -9,31 +9,49 @@ Crosshair::Crosshair(long elapsedMillis, Point<double> topLeftClip, Point<double
 void Crosshair::update(long elapsedMillis) {
   prevPosition = position;
   position = cursor.getPosition();
-  prevMouseClicked = currentMouseClicked;
-  currentMouseClicked = cursor.getLeftClick();
+  prevLeftClicked = currentLeftClicked;
+  currentLeftClicked = cursor.getLeftClick();
+  prevRightClicked = currentRightClicked;
+  currentRightClicked = cursor.getRightClick();
   
-  if (currentMouseClicked && !prevMouseClicked) {
+  if (currentLeftClicked && !prevLeftClicked) {
     lastDown = elapsedMillis;
     lastDownPosition.x = position.x;
     lastDownPosition.y = position.y;
   }
-  else if (!currentMouseClicked && prevMouseClicked) {
-    lastUp = elapsedMillis;
+  else if (currentRightClicked && !prevRightClicked) {
+    lastDown = elapsedMillis;
+    lastDownPosition.x = position.x;
+    lastDownPosition.y = position.y;
   }
   
   Point<double> dPos = position - lastDownPosition;
-  if ((elapsedMillis - lastDown < treshold) && (abs(dPos.x) < tresholdPosition && abs(dPos.y) < tresholdPosition) && !currentMouseClicked && prevMouseClicked) {
-    clicked = true;
+  if ((elapsedMillis - lastDown < treshold) && (abs(dPos.x) < tresholdPosition && abs(dPos.y) < tresholdPosition) && !currentLeftClicked && prevLeftClicked) {
+    leftClicked = true;
   }
   else {
-    clicked = false;
+    leftClicked = false;
   }
   
-  if (((abs(dPos.x) >= tresholdPosition || abs(dPos.y) >= tresholdPosition)) && currentMouseClicked && prevMouseClicked) {
-    hold = true;
+  if (((abs(dPos.x) >= tresholdPosition || abs(dPos.y) >= tresholdPosition)) && currentLeftClicked && prevLeftClicked) {
+    leftHold = true;
   }
   else {
-    hold = false;
+    leftHold = false;
+  }
+  
+  if ((elapsedMillis - lastDown < treshold) && (abs(dPos.x) < tresholdPosition && abs(dPos.y) < tresholdPosition) && !currentRightClicked && prevRightClicked) {
+    rightClicked = true;
+  }
+  else {
+    rightClicked = false;
+  }
+  
+  if (((abs(dPos.x) >= tresholdPosition || abs(dPos.y) >= tresholdPosition)) && currentRightClicked && prevRightClicked) {
+    rightHold = true;
+  }
+  else {
+    rightHold = false;
   }
 }
 
@@ -43,12 +61,20 @@ void Crosshair::render(FrameBuffer &fb) {
   }
 }
 
-bool Crosshair::isClicked() {
-  return clicked;
+bool Crosshair::isLeftClicked() {
+  return leftClicked;
 }
 
-bool Crosshair::isHold() {
-  return hold;
+bool Crosshair::isLeftHold() {
+  return leftHold;
+}
+
+bool Crosshair::isRightClicked() {
+  return rightClicked;
+}
+
+bool Crosshair::isRightHold() {
+  return rightHold;
 }
 
 Point<double> Crosshair::diffPosition() {
