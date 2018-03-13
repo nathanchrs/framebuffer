@@ -21,8 +21,6 @@ Bitmap::Bitmap(std::string bitmapFilePath) {
     uint32_t imageSize = ((width * 3 + 3) & (~3)) * height;
     image = new char[imageSize];
     fin.read(image, imageSize);
-
-    std::cout << "width: " << width << std::endl;
 }
 
 Bitmap::~Bitmap() {
@@ -34,9 +32,9 @@ void Bitmap::draw(FrameBuffer &fb, Point<long> position) {
     for (long y = 0; y < height; y++) {
         for (long x = 0; x < width; x++) {
             Color color(
-                image[(y * (width+1) + x) * 3 + 2],
-                image[(y * (width+1) + x) * 3 + 1],
-                image[(y * (width+1) + x) * 3]
+                image[(y * (width) + x) * 3 + 2],
+                image[(y * (width) + x) * 3 + 1],
+                image[(y * (width) + x) * 3]
             );
             if (!transparentBackground || color.r != mask.r || color.g != mask.g || color.b != mask.b) {
                 fb.setPixel(position + Point<long>(x, height-y-1), color);

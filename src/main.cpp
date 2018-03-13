@@ -31,8 +31,7 @@ int main() {
 	VectorSprite itbBuildingsReal("./src/assets/itb-buildings.txt");
 	VectorSprite itbBuildings = itbBuildingsReal.scale(0.5, Point<double>());
 	VectorSprite crossHairSprite("./src/assets/crosshair.txt");
-	Bitmap headerImage("./src/assets/nyancat.bmp");
-	headerImage.transparentBackground = true;
+	Bitmap headerImage("./src/assets/banner.bmp");
 
 	Path dot;
 	dot.segments.push_back(PathSegment<double>(Point<double>(-0.95,-0.95), Point<double>(-0.95,1.05)));
