@@ -57,7 +57,7 @@ int main() {
 	
 	objects.push_back(&detailView);
 	
-	Crosshair crosshair(0, mapView.position, mapView.position + mapView.size);
+	Crosshair crosshair(0, detailView.position, detailView.position + detailView.size);
 	crosshair.source = &crossHairSprite;
 	objects.push_back(&crosshair);
 	
@@ -100,15 +100,22 @@ int main() {
 		}
 
 		// Update internal state of all objects
+		if (crosshair.isHold()) {
+		  Point<double> diff = crosshair.diffPosition();
+		  diff.x *= detailView.sourceSize.x/detailView.size.x;
+		  diff.y *= detailView.sourceSize.y/detailView.size.y;
+		  detailView.sourcePosition = detailView.sourcePosition - diff;
+		}
+		
 		for (size_t i = 0; i < objects.size(); i++) {
 			objects[i]->update(elapsedMillis);
 		}
 		
-		if (crosshair.isClicked()) {
+		/*if (crosshair.isClicked()) {
 		  itbBuildings.paths.push_back(dot.translate(crosshair.position - mapView.position));
 		  itbBuildings.fillColors.push_back(Color(0xff, 0xff, 0xff));
 		  itbBuildings.strokeColors.push_back(Color(0xff, 0xff, 0xff));
-		}
+		}*/
 
 		/* RENDER */
 
