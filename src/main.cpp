@@ -10,6 +10,7 @@
 #include "graphics/Font.h"
 #include "graphics/PathSegment.h"
 #include "graphics/VectorSprite.h"
+#include "graphics/Bitmap.h"
 #include "objects/Renderable.h"
 #include "objects/View.h"
 #include "objects/Crosshair.h"
@@ -30,6 +31,9 @@ int main() {
 	VectorSprite itbBuildingsReal("./src/assets/itb-buildings.txt");
 	VectorSprite itbBuildings = itbBuildingsReal.scale(0.5, Point<double>());
 	VectorSprite crossHairSprite("./src/assets/crosshair.txt");
+	Bitmap headerImage("./src/assets/nyancat.bmp");
+	headerImage.transparentBackground = true;
+
 	Path dot;
 	dot.segments.push_back(PathSegment<double>(Point<double>(-0.95,-0.95), Point<double>(-0.95,1.05)));
 	dot.segments.push_back(PathSegment<double>(Point<double>(-0.95,1.05), Point<double>(1.05,1.05)));
@@ -119,6 +123,8 @@ int main() {
 		for (size_t i = 0; i < objects.size(); i++) {
 			objects[i]->render(fb);
 		}
+
+		headerImage.draw(fb, Point<double>(frame.thickness+1, frame.thickness+1));
 
 		// Draw credits text
 		/*int dataWidth = 31;
