@@ -17,7 +17,7 @@ public:
 
   VectorSprite source;
 
-  long thickness = 2;
+  long thickness = 5;
   long navbarHeight = 80;
   long sidebarWidth = 300;
   long bottomSidebarHeight = 300;

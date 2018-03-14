@@ -128,7 +128,6 @@ int main() {
 		    a2 += M_PI;
 		  }
 		  double a = (a1-a2 < 0) ? a1-a2 + 2*M_PI : a1-a2;
-		  std::cout << a1 << " " << a2 << " " << a << std::endl;
 		  Point<double> origin = mapView.sourcePosition + Point<double>(mapView.sourceSize.x * 0.5, mapView.sourceSize.x * 0.5);
 		  VectorSprite newSprite = mapView.source->rotate(a * 180/M_PI, origin);
 		  mapView.source->paths = newSprite.paths;
@@ -157,11 +156,11 @@ int main() {
 		fb.clear(Color(0x07, 0x00, 0x1a));
 
 		// Draw all objects
+		headerImage.draw(fb, Point<double>(frame.thickness-1, frame.thickness+1));
 		for (size_t i = 0; i < objects.size(); i++) {
 			objects[i]->render(fb);
 		}
 
-		headerImage.draw(fb, Point<double>(frame.thickness+1, frame.thickness+1));
 
 		// Draw credits text
 		/*int dataWidth = 31;
